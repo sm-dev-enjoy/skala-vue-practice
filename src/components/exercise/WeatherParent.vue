@@ -17,11 +17,16 @@ const showDetail = (cityName, status) => {
 <template>
   <div class="dashboard-wrapper">
     <BaseDashboardCard>
+      <template #header>
+        <h3>🔍 도시 검색</h3>
+      </template>
       <SearchBar :current-query="searchQuery" @update-query="updateQuery" />
     </BaseDashboardCard>
 
     <BaseDashboardCard>
-      <h3>🏙️ 지역별 날씨 현황</h3>
+      <template #header>
+        <h3>🏙️ 지역별 날씨 현황</h3>
+      </template>
 
       <WeatherCard
         v-for="item in filteredWeatherList"
@@ -29,7 +34,11 @@ const showDetail = (cityName, status) => {
         :city-item="item"
         @select-card="selectCity"
         @click-detail="showDetail(item.name, item.status)"
-      />
+      >
+        <template #actions="{ handleDetail }">
+          <button class="btn-detail" @click.stop="handleDetail">상세보기</button>
+        </template>
+      </WeatherCard>
 
       <p
         v-if="filteredWeatherList.length === 0"
@@ -37,11 +46,13 @@ const showDetail = (cityName, status) => {
       >
         😭 검색 결과와 일치하는 도시가 없습니다.
       </p>
-    </BaseDashboardCard>
 
-    <div class="status-bar">
-      {{ selectedCityInfo }}
-    </div>
+      <template #footer>
+        <div class="status-bar">
+          {{ selectedCityInfo }}
+        </div>
+      </template>
+    </BaseDashboardCard>
   </div>
 </template>
 
@@ -49,5 +60,19 @@ const showDetail = (cityName, status) => {
 .dashboard-wrapper {
   width: 600px;
   margin: 0 auto;
+}
+
+.btn-detail {
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.status-bar {
+  background: #e8f5e9;
+  padding: 10px;
+  text-align: center;
+  color: #2e7d32;
+  font-weight: bold;
+  border-radius: 6px;
 }
 </style>
