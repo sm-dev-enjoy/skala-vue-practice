@@ -23,16 +23,16 @@ This repository contains the weather practice exercises used in class.
 
 #### Screenshot 1. Day 2 Practice View
 
-![Day 2 Practice View](docs/screenshots/day2-practice.png)
+![Day 2 Practice View](스크린캡처.png)
 
 #### Screenshot 2. Weather Tuning View
 
-![Weather Tuning View](docs/screenshots/weather-tuning.png)
+![Weather Tuning View](스크린캡처.png)
 
 ### Notes
 
 - The current screen shows the full day 2 practice stack from Reactive State through Component Slot.
-- The weather exercise tuning is included in the repository and can be captured separately if needed.
+- The attached capture is the current reference image; if you add a second screenshot later, replace the duplicated path above with the new file.
 
 ## Recommended IDE Setup
 
