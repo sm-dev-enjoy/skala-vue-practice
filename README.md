@@ -19,20 +19,20 @@ This repository contains the weather practice exercises used in class.
 
 ### Screenshot Area
 
-첨부용 스크린샷은 아래 영역에 넣으면 됩니다.
+아래는 오늘 캡처한 화면을 기준으로 정리한 제출용 영역입니다.
 
-#### Screenshot 1. Day 2 Practice
+#### Screenshot 1. Day 2 Practice View
 
-![Day 2 Practice Screenshot](docs/screenshots/day2-practice.png)
+![Day 2 Practice View](docs/screenshots/day2-practice.png)
 
-#### Screenshot 2. Weather Tuning
+#### Screenshot 2. Weather Tuning View
 
-![Weather Tuning Screenshot](docs/screenshots/weather-tuning.png)
+![Weather Tuning View](docs/screenshots/weather-tuning.png)
 
 ### Notes
 
-- The app includes the required weather practice screens and a few small personal tuning changes.
-- If the screenshots are not yet available, replace the image paths above after capturing them.
+- The current screen shows the full day 2 practice stack from Reactive State through Component Slot.
+- The weather exercise tuning is included in the repository and can be captured separately if needed.
 
 ## Recommended IDE Setup
 
