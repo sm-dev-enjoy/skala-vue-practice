@@ -63,7 +63,9 @@ const showDetail = (cityName, status) => {
         <span v-else-if="item.temp >= 25" class="badge warm">🌤️ 보통 (25도 이상)</span>
         <span v-else class="badge cool">❄️ 선선함 (25도 미만)</span>
 
-        <button class="btn-detail" @click.stop="showDetail(item.name, item.status)">상세보기</button>
+        <button class="btn-detail" @click.stop="showDetail(item.name, item.status)">
+          상세보기
+        </button>
       </div>
     </section>
 
