@@ -5,8 +5,8 @@ import UnitToggler from './components/exercise/UnitToggler.vue'
 <template>
   <div class="app-shell">
     <header class="app-header">
-      <h1>⛅ 과제 5: 스토어적용</h1>
-      <p>날씨 대시보드, 서비스 소개, 상세 페이지를 라우터로 이동합니다.</p>
+      <h1>⛅ 과제 6: 날씨 데이터 연동</h1>
+      <p>OpenWeatherMap 실시간 데이터와 라우터 화면을 함께 연결합니다.</p>
     </header>
 
     <div class="dashboard-wrapper">
