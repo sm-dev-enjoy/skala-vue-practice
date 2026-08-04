@@ -11,7 +11,7 @@ defineProps({
 const emit = defineEmits(['select-card', 'click-detail'])
 
 const handleDetailClick = () => {
-  emit('click-detail', cityItem.name, cityItem.status)
+  emit('click-detail', cityItem.id, cityItem.name, cityItem.status)
 }
 </script>
 
