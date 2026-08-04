@@ -1,7 +1,11 @@
+<script setup>
+import UnitToggler from './components/exercise/UnitToggler.vue'
+</script>
+
 <template>
   <div class="app-shell">
     <header class="app-header">
-      <h1>⛅ 과제 4: 라우터적용</h1>
+      <h1>⛅ 과제 5: 스토어적용</h1>
       <p>날씨 대시보드, 서비스 소개, 상세 페이지를 라우터로 이동합니다.</p>
     </header>
 
@@ -10,6 +14,7 @@
         <RouterLink to="/" class="nav-item">🌦️ 날씨 대시보드</RouterLink>
         <span class="divider">|</span>
         <RouterLink to="/about" class="nav-item">ℹ️ 서비스 소개</RouterLink>
+        <UnitToggler />
       </nav>
 
       <main class="view-panel">
