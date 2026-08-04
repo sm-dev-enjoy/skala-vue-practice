@@ -19,7 +19,7 @@ const cityMapping = {
 
 const cityData = ref(null)
 
-const API_KEY = '8964edc63b366d27b5b728b7976570b7'
+const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY
 
 const fetchDetailWeather = async () => {
   const targetCity = cityMapping[route.params.cityId]
@@ -77,7 +77,9 @@ const displayTemp = computed(() => {
     <h3>📊 지역별 상세 기상 관측 정보 (실시간 데이터 연동)</h3>
     <hr />
 
-    <div v-if="isLoading" class="loading-message">데이터베이스로부터 상세 정보를 동기화하는 중입니다...</div>
+    <div v-if="isLoading" class="loading-message">
+      데이터베이스로부터 상세 정보를 동기화하는 중입니다...
+    </div>
 
     <template v-else>
       <div v-if="errorMessage && !cityData" class="error-message">{{ errorMessage }}</div>

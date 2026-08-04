@@ -17,7 +17,7 @@ const { weatherList, searchQuery, selectedCityInfo, filteredWeatherList, updateQ
 const isLoading = ref(false)
 const errorMessage = ref('')
 
-const API_KEY = '8964edc63b366d27b5b728b7976570b7'
+const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY
 const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather'
 
 const fetchRealTimeWeather = async () => {
@@ -52,7 +52,8 @@ const fetchRealTimeWeather = async () => {
       },
     ]
 
-    searchQuery.value = typeof route.query.search === 'string' ? route.query.search : searchQuery.value
+    searchQuery.value =
+      typeof route.query.search === 'string' ? route.query.search : searchQuery.value
     weatherList.value = realTimeWeather
   } catch (error) {
     console.error('🔴 날씨 API 연동 실패:', error)
@@ -106,7 +107,9 @@ const handleDetailJump = (cityId) => {
         <h3>🏙️ 지역별 날씨 현황 (실시간 OpenWeatherMap)</h3>
       </template>
 
-      <p v-if="isLoading" class="loading-message">🔄 글로벌 기상 위성으로부터 실시간 데이터를 수신 중입니다...</p>
+      <p v-if="isLoading" class="loading-message">
+        🔄 글로벌 기상 위성으로부터 실시간 데이터를 수신 중입니다...
+      </p>
 
       <template v-else>
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
