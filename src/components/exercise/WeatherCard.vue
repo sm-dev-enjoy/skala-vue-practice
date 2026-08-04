@@ -1,6 +1,6 @@
 <script setup>
 // 1. 상위로부터 단방향 주입받을 객체 데이터 규격 검수 (매크로)
-defineProps({
+const props = defineProps({
   cityItem: {
     type: Object,
     required: true,
@@ -11,7 +11,7 @@ defineProps({
 const emit = defineEmits(['select-card', 'click-detail'])
 
 const handleDetailClick = () => {
-  emit('click-detail', cityItem.id, cityItem.name, cityItem.status)
+  emit('click-detail', props.cityItem.id, props.cityItem.name, props.cityItem.status)
 }
 </script>
 
