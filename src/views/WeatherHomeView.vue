@@ -18,6 +18,7 @@ const { weatherList, searchQuery, selectedCityInfo, filteredWeatherList, updateQ
 
 const { isLoading, errorMessage, fetchRealTimeWeatherList, formatTemperature } = useWeatherApi()
 
+// 메인 Hero 배너 선택 인덱스
 const selectedHeroIndex = ref(0)
 
 const heroCity = computed(() => {
@@ -26,6 +27,14 @@ const heroCity = computed(() => {
 })
 
 const heroTemp = computed(() => formatTemperature(heroCity.value?.temp))
+
+// Hero 배너 날씨 동적 SVG 아이콘 계산 (해 모양 고정 버그 수정)
+const heroWeatherIcon = computed(() => {
+  const status = heroCity.value?.status ?? ''
+  if (status.includes('맑음') || status.includes('Clear') || status.includes('Sun')) return 'sun'
+  if (status.includes('비') || status.includes('Rain') || status.includes('소나기')) return 'rain'
+  return 'cloud'
+})
 
 const quickCities = [
   { name: '서울', key: 'Seoul', index: 0 },
@@ -63,7 +72,7 @@ watch(searchQuery, (nextQuery) => {
 
 const handleSelectHeroCity = (index, name) => {
   selectedHeroIndex.value = index
-  selectCity(`${name} 관측소 선택됨`)
+  selectCity(`${name} 관측소가 메인 하이라이트에 선택되었습니다.`)
 }
 
 const handleDetailJump = (cityId) => {
@@ -78,7 +87,7 @@ const handleDetailJump = (cityId) => {
       <div class="hero-top">
         <div class="hero-tag">
           <SvgIcon name="sparkles" size="14" color="#1b64da" />
-          <span>실시간 기상관측</span>
+          <span>실시간 관측</span>
         </div>
 
         <button class="refresh-link" @click="loadWeatherData">
@@ -96,8 +105,9 @@ const handleDetailJump = (cityId) => {
           <p class="status-title">{{ heroCity.status }}</p>
         </div>
 
+        <!-- 동적 날씨 SVG 아이콘 바인딩 (해 고정 버그 완벽 수정) -->
         <div class="hero-right-visual">
-          <SvgIcon name="sun" size="48" color="#3182f6" />
+          <SvgIcon :name="heroWeatherIcon" size="48" color="#3182f6" />
           <div class="hero-temp-group">
             <span class="big-temp">{{ heroTemp }}</span>
             <span class="big-unit">{{ configStore.unitSymbol }}</span>

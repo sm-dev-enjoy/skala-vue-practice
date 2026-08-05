@@ -19,12 +19,14 @@ const displayTemp = computed(() => formatTemperature(props.cityItem?.temp))
 
 const weatherIconName = computed(() => {
   const status = props.cityItem?.status ?? ''
-  if (status.includes('맑음') || status.includes('Sun')) return 'sun'
-  if (status.includes('비') || status.includes('Rain')) return 'rain'
+  if (status.includes('맑음') || status.includes('Clear') || status.includes('Sun')) return 'sun'
+  if (status.includes('비') || status.includes('Rain') || status.includes('소나기')) return 'rain'
   return 'cloud'
 })
 
-const handleDetailClick = () => {
+// 카드 전체 클릭 시 상세 페이지 이동 및 부모 통지
+const handleCardClick = () => {
+  emit('select-card', `${props.cityItem.name} 관측소로 이동합니다.`)
   emit('click-detail', props.cityItem.id, props.cityItem.name, props.cityItem.status)
 }
 </script>
@@ -32,7 +34,7 @@ const handleDetailClick = () => {
 <template>
   <div
     class="toss-weather-card"
-    @click="emit('select-card', `${cityItem.name} 관측소를 선택했습니다.`)"
+    @click="handleCardClick"
   >
     <div class="card-top-row">
       <div class="status-icon-box">
@@ -48,7 +50,7 @@ const handleDetailClick = () => {
     <div class="card-middle-row">
       <div class="city-box">
         <h4 class="city-name">{{ cityItem.name }}</h4>
-        <span class="city-sub">실시간 기상</span>
+        <span class="city-sub">실시간 기상 관측</span>
       </div>
 
       <div class="right-temp">
@@ -58,10 +60,10 @@ const handleDetailClick = () => {
     </div>
 
     <div class="card-bottom">
-      <button class="toss-btn-text" @click.stop="handleDetailClick">
-        <span>상세 정보 보기</span>
+      <div class="toss-btn-text">
+        <span>상세 페이지 보기</span>
         <SvgIcon name="arrow-right" size="14" color="#3182f6" />
-      </button>
+      </div>
     </div>
   </div>
 </template>
@@ -73,16 +75,22 @@ const handleDetailClick = () => {
   border-radius: 16px;
   padding: 20px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease-in-out;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  user-select: none;
 }
 
 .toss-weather-card:hover {
-  border-color: #b0c4de;
+  border-color: #3182f6;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 6px 20px rgba(49, 130, 246, 0.08);
+}
+
+.toss-weather-card:active {
+  transform: scale(0.985);
+  background: #f8fafc;
 }
 
 .card-top-row {
@@ -150,19 +158,11 @@ const handleDetailClick = () => {
 }
 
 .toss-btn-text {
-  background: transparent;
-  border: none;
   color: var(--toss-blue);
   font-size: 14px;
   font-weight: 600;
-  cursor: pointer;
-  padding: 0;
   display: flex;
   align-items: center;
   gap: 4px;
-}
-
-.toss-btn-text:hover {
-  color: var(--toss-blue-hover);
 }
 </style>
