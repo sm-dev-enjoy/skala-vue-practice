@@ -45,10 +45,6 @@ const activeMenu = computed(() => route.path)
     <main class="main-body">
       <RouterView />
     </main>
-
-    <footer class="toss-footer">
-      <p>날씨 데이터 출처: OpenWeatherMap REST API</p>
-    </footer>
   </div>
 </template>
 
@@ -122,12 +118,5 @@ const activeMenu = computed(() => route.path)
 
 .main-body {
   min-height: 480px;
-}
-
-.toss-footer {
-  margin-top: 40px;
-  text-align: center;
-  color: var(--toss-muted);
-  font-size: 13px;
 }
 </style>
