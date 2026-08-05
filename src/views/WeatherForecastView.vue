@@ -19,6 +19,43 @@ const cityOptions = [
   { label: '부산', value: 'Busan' },
 ]
 
+/**
+ * 날씨 상태(맑음, 비, 구름 등)에 따라 직관적인 시각적 뱃지 테마와 SVG 아이콘을 반환하는 유틸리티
+ */
+const getWeatherStateTheme = (description) => {
+  const desc = description ?? ''
+  
+  if (desc.includes('맑음') || desc.includes('Clear') || desc.includes('Sun')) {
+    return {
+      label: desc,
+      icon: 'sun',
+      bg: '#fff7ed',
+      color: '#c2410c',
+      border: '#ffedd5',
+      iconColor: '#ea580c',
+    }
+  }
+  if (desc.includes('비') || desc.includes('Rain') || desc.includes('소나기') || desc.includes('Drizzle')) {
+    return {
+      label: desc,
+      icon: 'rain',
+      bg: '#f0f9ff',
+      color: '#0284c7',
+      border: '#bae6fd',
+      iconColor: '#0284c7',
+    }
+  }
+  // 구름 / 흐림 및 기타
+  return {
+    label: desc,
+    icon: 'cloud',
+    bg: '#f1f5f9',
+    color: '#475569',
+    border: '#e2e8f0',
+    iconColor: '#64748b',
+  }
+}
+
 onMounted(() => {
   fetchForecast(selectedCity.value)
 })
@@ -57,24 +94,33 @@ watch(selectedCity, (newCity) => {
         >
           <div class="item-left">
             <span class="time-text">{{ item.time }}</span>
-            <div class="status-row">
-              <img
-                :src="`https://openweathermap.org/img/wn/${item.icon}.png`"
-                :alt="item.description"
-                class="mini-icon"
+
+            <!-- 직관적인 날씨 상태 뱃지 칩 -->
+            <div
+              class="weather-state-chip"
+              :style="{
+                backgroundColor: getWeatherStateTheme(item.description).bg,
+                color: getWeatherStateTheme(item.description).color,
+                borderColor: getWeatherStateTheme(item.description).border,
+              }"
+            >
+              <SvgIcon
+                :name="getWeatherStateTheme(item.description).icon"
+                size="15"
+                :color="getWeatherStateTheme(item.description).iconColor"
               />
-              <span class="desc-text">{{ item.description }}</span>
+              <span class="chip-label">{{ getWeatherStateTheme(item.description).label }}</span>
             </div>
           </div>
 
           <div class="item-right">
             <div class="mini-metrics">
               <span class="m-item">
-                <SvgIcon name="droplet" size="13" color="#64748b" />
+                <SvgIcon name="droplet" size="13" color="#8b95a1" />
                 {{ item.humidity }}%
               </span>
               <span class="m-item">
-                <SvgIcon name="wind" size="13" color="#64748b" />
+                <SvgIcon name="wind" size="13" color="#8b95a1" />
                 {{ item.windSpeed }}m/s
               </span>
             </div>
@@ -121,12 +167,12 @@ watch(selectedCity, (newCity) => {
 .toss-forecast-card {
   background: var(--toss-canvas);
   border: 1px solid var(--toss-border);
-  border-radius: 14px;
-  padding: 16px 24px;
+  border-radius: 16px;
+  padding: 18px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .toss-forecast-card:hover {
@@ -137,7 +183,8 @@ watch(selectedCity, (newCity) => {
 .item-left {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  align-items: flex-start;
+  gap: 6px;
 }
 
 .time-text {
@@ -146,27 +193,27 @@ watch(selectedCity, (newCity) => {
   color: var(--toss-muted);
 }
 
-.status-row {
-  display: flex;
+/* 상태별 직관적 뱃지 칩 */
+.weather-state-chip {
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-}
-
-.mini-icon {
-  width: 24px;
-  height: 24px;
-}
-
-.desc-text {
-  font-size: 15px;
+  padding: 5px 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-size: 14px;
   font-weight: 700;
-  color: var(--toss-foreground);
+  line-height: 1.2;
+}
+
+.chip-label {
+  font-size: 14px;
 }
 
 .item-right {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 24px;
 }
 
 .mini-metrics {
@@ -176,6 +223,7 @@ watch(selectedCity, (newCity) => {
   font-size: 13px;
   color: var(--toss-muted);
   gap: 4px;
+  font-weight: 500;
 }
 
 .m-item {
@@ -185,8 +233,9 @@ watch(selectedCity, (newCity) => {
 }
 
 .temp-text {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
   color: var(--toss-blue);
+  letter-spacing: -0.5px;
 }
 </style>
