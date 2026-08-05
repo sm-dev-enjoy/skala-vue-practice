@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import UnitToggler from './components/exercise/UnitToggler.vue'
+import SvgIcon from './components/common/SvgIcon.vue'
 
 const route = useRoute()
 const activeMenu = computed(() => route.path)
@@ -13,7 +14,9 @@ const activeMenu = computed(() => route.path)
     <header class="toss-header">
       <div class="header-main-row">
         <div class="brand-group">
-          <span class="brand-logo-badge">날씨</span>
+          <div class="brand-logo-icon">
+            <SvgIcon name="sun" size="20" color="#ffffff" />
+          </div>
           <h1 class="brand-title">날씨 인사이트</h1>
         </div>
 
@@ -80,13 +83,14 @@ const activeMenu = computed(() => route.path)
   gap: 10px;
 }
 
-.brand-logo-badge {
+.brand-logo-icon {
   background: var(--toss-blue);
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 4px 8px;
-  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
 }
 
 .brand-title {

@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 import WeatherCard from '../components/exercise/WeatherCard.vue'
 import StatusAlert from '../components/common/StatusAlert.vue'
+import SvgIcon from '../components/common/SvgIcon.vue'
 import { useWeatherSearch } from '@/composables/useWeatherSearch'
 import { useWeatherApi } from '@/composables/useWeatherApi'
 import { useConfigStore } from '@/stores/configStore'
@@ -75,25 +76,38 @@ const handleDetailJump = (cityId) => {
     <!-- Toss Primary Hero Card -->
     <div v-if="heroCity" class="toss-hero-card">
       <div class="hero-top">
-        <span class="toss-badge">실시간 관측</span>
-        <button class="refresh-link" @click="loadWeatherData">새로고침</button>
+        <div class="hero-tag">
+          <SvgIcon name="sparkles" size="14" color="#1b64da" />
+          <span>실시간 기상관측</span>
+        </div>
+
+        <button class="refresh-link" @click="loadWeatherData">
+          <SvgIcon name="refresh" size="14" color="#8b95a1" />
+          <span>새로고침</span>
+        </button>
       </div>
 
       <div class="hero-content">
         <div class="hero-city-group">
-          <h2 class="city-title">{{ heroCity.name }}</h2>
+          <div class="city-name-row">
+            <SvgIcon name="map-pin" size="24" color="#3182f6" />
+            <h2 class="city-title">{{ heroCity.name }}</h2>
+          </div>
           <p class="status-title">{{ heroCity.status }}</p>
         </div>
 
-        <div class="hero-temp-group">
-          <span class="big-temp">{{ heroTemp }}</span>
-          <span class="big-unit">{{ configStore.unitSymbol }}</span>
+        <div class="hero-right-visual">
+          <SvgIcon name="sun" size="48" color="#3182f6" />
+          <div class="hero-temp-group">
+            <span class="big-temp">{{ heroTemp }}</span>
+            <span class="big-unit">{{ configStore.unitSymbol }}</span>
+          </div>
         </div>
       </div>
 
       <!-- Quick City Selector Buttons -->
       <div class="hero-city-chips">
-        <span class="chips-title">관측 지역</span>
+        <span class="chips-title">관측 지역 선택:</span>
         <div class="chips-wrap">
           <button
             v-for="city in quickCities"
@@ -188,6 +202,18 @@ const handleDetailJump = (cityId) => {
   margin-bottom: 20px;
 }
 
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--toss-weak-bg);
+  color: var(--toss-weak-fg);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .refresh-link {
   background: transparent;
   border: none;
@@ -195,6 +221,9 @@ const handleDetailJump = (cityId) => {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .refresh-link:hover {
@@ -208,8 +237,14 @@ const handleDetailJump = (cityId) => {
   margin-bottom: 24px;
 }
 
+.city-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .city-title {
-  margin: 0 0 4px 0;
+  margin: 0;
   font-size: 30px;
   font-weight: 700;
   color: var(--toss-foreground);
@@ -217,9 +252,16 @@ const handleDetailJump = (cityId) => {
 }
 
 .status-title {
-  margin: 0;
+  margin: 6px 0 0 0;
   font-size: 16px;
   color: var(--toss-body);
+  font-weight: 500;
+}
+
+.hero-right-visual {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .hero-temp-group {

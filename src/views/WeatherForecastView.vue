@@ -5,6 +5,7 @@ import { useForecast } from '@/composables/useForecast'
 import { useWeatherApi } from '@/composables/useWeatherApi'
 import CitySelector from '../components/common/CitySelector.vue'
 import StatusAlert from '../components/common/StatusAlert.vue'
+import SvgIcon from '../components/common/SvgIcon.vue'
 
 const configStore = useConfigStore()
 const selectedCity = ref('Seoul')
@@ -56,13 +57,26 @@ watch(selectedCity, (newCity) => {
         >
           <div class="item-left">
             <span class="time-text">{{ item.time }}</span>
-            <span class="desc-text">{{ item.description }}</span>
+            <div class="status-row">
+              <img
+                :src="`https://openweathermap.org/img/wn/${item.icon}.png`"
+                :alt="item.description"
+                class="mini-icon"
+              />
+              <span class="desc-text">{{ item.description }}</span>
+            </div>
           </div>
 
           <div class="item-right">
             <div class="mini-metrics">
-              <span>습도 {{ item.humidity }}%</span>
-              <span>풍속 {{ item.windSpeed }}m/s</span>
+              <span class="m-item">
+                <SvgIcon name="droplet" size="13" color="#64748b" />
+                {{ item.humidity }}%
+              </span>
+              <span class="m-item">
+                <SvgIcon name="wind" size="13" color="#64748b" />
+                {{ item.windSpeed }}m/s
+              </span>
             </div>
             <div class="temp-text">
               {{ formatTemperature(item.temp) }}{{ configStore.unitSymbol }}
@@ -108,10 +122,16 @@ watch(selectedCity, (newCity) => {
   background: var(--toss-canvas);
   border: 1px solid var(--toss-border);
   border-radius: 14px;
-  padding: 18px 24px;
+  padding: 16px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: all 0.2s ease;
+}
+
+.toss-forecast-card:hover {
+  border-color: #b0c4de;
+  transform: translateY(-1px);
 }
 
 .item-left {
@@ -121,9 +141,20 @@ watch(selectedCity, (newCity) => {
 }
 
 .time-text {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--toss-body);
+  color: var(--toss-muted);
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mini-icon {
+  width: 24px;
+  height: 24px;
 }
 
 .desc-text {
@@ -144,7 +175,13 @@ watch(selectedCity, (newCity) => {
   align-items: flex-end;
   font-size: 13px;
   color: var(--toss-muted);
-  gap: 2px;
+  gap: 4px;
+}
+
+.m-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .temp-text {

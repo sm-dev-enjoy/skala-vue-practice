@@ -3,6 +3,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useAirPollution } from '@/composables/useAirPollution'
 import CitySelector from '../components/common/CitySelector.vue'
 import StatusAlert from '../components/common/StatusAlert.vue'
+import SvgIcon from '../components/common/SvgIcon.vue'
 
 const selectedCityKey = ref('seoul')
 const { isLoading, errorMessage, airData, getAqiStatus, fetchAirPollution } = useAirPollution()
@@ -47,12 +48,16 @@ watch(selectedCityKey, (newKey) => {
         <!-- Toss AQI Summary Card -->
         <div class="toss-aqi-card">
           <div class="aqi-left">
-            <span class="location-name">{{ airData.cityName }} 대기 환경</span>
+            <div class="header-tag-row">
+              <SvgIcon name="air" size="18" color="#3182f6" />
+              <span class="location-name">{{ airData.cityName }} 대기 환경</span>
+            </div>
+
             <div class="aqi-badge-wrap">
               <span class="toss-badge">
                 {{ getAqiStatus(airData.aqi).label.replace(/[🟢🔵🟡🟠🔴]/g, '').trim() }}
               </span>
-              <span class="aqi-score">지수 {{ airData.aqi }} / 5</span>
+              <span class="aqi-score">지수 레벨 {{ airData.aqi }} / 5</span>
             </div>
           </div>
 
@@ -68,13 +73,19 @@ watch(selectedCityKey, (newKey) => {
 
         <!-- Air Pollutants Grid Cards -->
         <div class="air-grid">
-          <div class="air-item-card">
-            <span class="item-name">초미세먼지 (PM2.5)</span>
+          <div class="air-item-card highlighted">
+            <div class="card-icon-title">
+              <SvgIcon name="droplet" size="15" color="#3182f6" />
+              <span class="item-name">초미세먼지 (PM2.5)</span>
+            </div>
             <span class="item-val">{{ airData.pm2_5 }} <small>µg/m³</small></span>
           </div>
 
-          <div class="air-item-card">
-            <span class="item-name">미세먼지 (PM10)</span>
+          <div class="air-item-card highlighted">
+            <div class="card-icon-title">
+              <SvgIcon name="cloud" size="15" color="#3182f6" />
+              <span class="item-name">미세먼지 (PM10)</span>
+            </div>
             <span class="item-val">{{ airData.pm10 }} <small>µg/m³</small></span>
           </div>
 
@@ -133,12 +144,17 @@ watch(selectedCityKey, (newKey) => {
   margin-bottom: 16px;
 }
 
+.header-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
 .location-name {
   font-size: 18px;
   font-weight: 700;
   color: var(--toss-foreground);
-  display: block;
-  margin-bottom: 10px;
 }
 
 .aqi-badge-wrap {
@@ -166,6 +182,17 @@ watch(selectedCityKey, (newKey) => {
   padding: 16px;
   display: flex;
   flex-direction: column;
+  gap: 8px;
+}
+
+.air-item-card.highlighted {
+  border-color: #b0c4de;
+  background: #f4f8ff;
+}
+
+.card-icon-title {
+  display: flex;
+  align-items: center;
   gap: 6px;
 }
 

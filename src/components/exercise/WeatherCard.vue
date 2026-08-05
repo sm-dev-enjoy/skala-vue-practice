@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useConfigStore } from '@/stores/configStore'
 import { useWeatherApi } from '@/composables/useWeatherApi'
+import SvgIcon from '../common/SvgIcon.vue'
 
 const props = defineProps({
   cityItem: {
@@ -16,6 +17,13 @@ const { formatTemperature } = useWeatherApi()
 
 const displayTemp = computed(() => formatTemperature(props.cityItem?.temp))
 
+const weatherIconName = computed(() => {
+  const status = props.cityItem?.status ?? ''
+  if (status.includes('맑음') || status.includes('Sun')) return 'sun'
+  if (status.includes('비') || status.includes('Rain')) return 'rain'
+  return 'cloud'
+})
+
 const handleDetailClick = () => {
   emit('click-detail', props.cityItem.id, props.cityItem.name, props.cityItem.status)
 }
@@ -26,16 +34,21 @@ const handleDetailClick = () => {
     class="toss-weather-card"
     @click="emit('select-card', `${cityItem.name} 관측소를 선택했습니다.`)"
   >
-    <div class="card-main">
-      <div class="left-box">
-        <h4 class="city-name">{{ cityItem.name }}</h4>
+    <div class="card-top-row">
+      <div class="status-icon-box">
+        <SvgIcon :name="weatherIconName" size="22" color="#3182f6" />
         <span class="status-label">{{ cityItem.status }}</span>
+      </div>
 
-        <div class="badge-group">
-          <span v-if="cityItem.temp >= 28" class="toss-badge danger">고온 경보</span>
-          <span v-else-if="cityItem.temp >= 20" class="toss-badge">적정 기온</span>
-          <span v-else class="toss-badge">저온</span>
-        </div>
+      <span v-if="cityItem.temp >= 28" class="toss-badge danger">고온 경보</span>
+      <span v-else-if="cityItem.temp >= 20" class="toss-badge">적정 기온</span>
+      <span v-else class="toss-badge">저온</span>
+    </div>
+
+    <div class="card-middle-row">
+      <div class="city-box">
+        <h4 class="city-name">{{ cityItem.name }}</h4>
+        <span class="city-sub">실시간 기상</span>
       </div>
 
       <div class="right-temp">
@@ -45,11 +58,10 @@ const handleDetailClick = () => {
     </div>
 
     <div class="card-bottom">
-      <slot name="actions" :city-item="cityItem" :handle-detail="handleDetailClick">
-        <button class="toss-btn-text" @click.stop="handleDetailClick">
-          상세 정보 보기
-        </button>
-      </slot>
+      <button class="toss-btn-text" @click.stop="handleDetailClick">
+        <span>상세 정보 보기</span>
+        <SvgIcon name="arrow-right" size="14" color="#3182f6" />
+      </button>
     </div>
   </div>
 </template>
@@ -61,7 +73,7 @@ const handleDetailClick = () => {
   border-radius: 16px;
   padding: 20px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -69,28 +81,46 @@ const handleDetailClick = () => {
 
 .toss-weather-card:hover {
   border-color: #b0c4de;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
 }
 
-.card-main {
+.card-top-row {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.status-icon-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--toss-body);
+}
+
+.card-middle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
   margin-bottom: 16px;
 }
 
 .city-name {
-  margin: 0 0 2px 0;
-  font-size: 18px;
+  margin: 0;
+  font-size: 20px;
   font-weight: 700;
   color: var(--toss-foreground);
 }
 
-.status-label {
-  font-size: 14px;
-  color: var(--toss-body);
-  display: block;
-  margin-bottom: 8px;
+.city-sub {
+  font-size: 12px;
+  color: var(--toss-muted);
 }
 
 .right-temp {
@@ -127,10 +157,12 @@ const handleDetailClick = () => {
   font-weight: 600;
   cursor: pointer;
   padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .toss-btn-text:hover {
   color: var(--toss-blue-hover);
-  text-decoration: underline;
 }
 </style>

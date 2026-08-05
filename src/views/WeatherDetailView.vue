@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useConfigStore } from '@/stores/configStore'
 import { useWeatherApi } from '@/composables/useWeatherApi'
 import StatusAlert from '../components/common/StatusAlert.vue'
+import SvgIcon from '../components/common/SvgIcon.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -47,8 +48,11 @@ const displayFeelsLike = computed(() => formatTemperature(cityData.value?.feelsL
         <!-- Toss Banner Card -->
         <div class="banner-card">
           <div class="banner-info">
-            <h3 class="city-name">{{ cityData.name }}</h3>
-            <span class="sub-info">{{ cityData.englishName }} | {{ cityData.country }}</span>
+            <div class="banner-title-row">
+              <SvgIcon name="map-pin" size="22" color="#3182f6" />
+              <h3 class="city-name">{{ cityData.name }}</h3>
+            </div>
+            <span class="sub-info">OpenWeather ID: {{ cityData.englishName }} | 국가: {{ cityData.country }}</span>
           </div>
 
           <div class="banner-temp">
@@ -60,32 +64,50 @@ const displayFeelsLike = computed(() => formatTemperature(cityData.value?.feelsL
         <!-- Detail Metrics Grid -->
         <div class="metrics-grid">
           <div class="metric-card">
-            <span class="m-title">실시간 기온</span>
+            <div class="m-title-row">
+              <SvgIcon name="thermometer" size="16" color="#3182f6" />
+              <span class="m-title">실시간 기온</span>
+            </div>
             <span class="m-value">{{ displayTemp }}{{ configStore.unitSymbol }}</span>
           </div>
 
           <div class="metric-card">
-            <span class="m-title">체감 온도</span>
+            <div class="m-title-row">
+              <SvgIcon name="sun" size="16" color="#3182f6" />
+              <span class="m-title">체감 온도</span>
+            </div>
             <span class="m-value">{{ displayFeelsLike }}{{ configStore.unitSymbol }}</span>
           </div>
 
           <div class="metric-card">
-            <span class="m-title">기상 현황</span>
+            <div class="m-title-row">
+              <SvgIcon name="cloud" size="16" color="#3182f6" />
+              <span class="m-title">기상 현황</span>
+            </div>
             <span class="m-value">{{ cityData.status }}</span>
           </div>
 
           <div class="metric-card">
-            <span class="m-title">대기 습도</span>
+            <div class="m-title-row">
+              <SvgIcon name="droplet" size="16" color="#3182f6" />
+              <span class="m-title">대기 습도</span>
+            </div>
             <span class="m-value">{{ cityData.humidity }}</span>
           </div>
 
           <div class="metric-card">
-            <span class="m-title">풍속</span>
+            <div class="m-title-row">
+              <SvgIcon name="wind" size="16" color="#3182f6" />
+              <span class="m-title">풍속</span>
+            </div>
             <span class="m-value">{{ cityData.windSpeed }}</span>
           </div>
 
           <div class="metric-card">
-            <span class="m-title">기압</span>
+            <div class="m-title-row">
+              <SvgIcon name="gauge" size="16" color="#3182f6" />
+              <span class="m-title">기압</span>
+            </div>
             <span class="m-value">{{ cityData.pressure }}</span>
           </div>
         </div>
@@ -135,8 +157,15 @@ const displayFeelsLike = computed(() => formatTemperature(cityData.value?.feelsL
   margin-bottom: 16px;
 }
 
+.banner-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
 .city-name {
-  margin: 0 0 4px 0;
+  margin: 0;
   font-size: 24px;
   font-weight: 700;
   color: var(--toss-foreground);
@@ -179,6 +208,12 @@ const displayFeelsLike = computed(() => formatTemperature(cityData.value?.feelsL
   padding: 16px;
   display: flex;
   flex-direction: column;
+  gap: 8px;
+}
+
+.m-title-row {
+  display: flex;
+  align-items: center;
   gap: 6px;
 }
 
