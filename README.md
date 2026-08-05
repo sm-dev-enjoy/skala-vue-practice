@@ -2,7 +2,7 @@
 
 > **대한민국 전국 14개 주요 도시의 실시간 날씨, 5일간의 단기 기상 예보, 통합 대기질(AQI) 정보를 한눈에 제공하는 직관적인 대시보드 웹 애플리케이션입니다.**
 
-🌐 **서비스 바로가기 (배포 링크)**: [https://weather-pro-chi.vercel.app](https://weather-pro-chi.vercel.app/)
+🌐 **서비스 바로가기 (배포 링크)**: [https://weather-insight-ko.vercel.app](https://weather-insight-ko.vercel.app/)
 
 ---
 
