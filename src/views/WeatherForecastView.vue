@@ -28,14 +28,14 @@ watch(selectedCity, (newCity) => {
 </script>
 
 <template>
-  <el-card class="forecast-card" shadow="never">
+  <el-card class="forecast-card glass-panel" shadow="never">
     <template #header>
       <div class="forecast-header">
         <div>
           <h3>📅 5일 / 3시간 단위 기상 예보</h3>
           <p class="sub-desc">주요 도시의 단기 기상 예측 데이터를 실시간으로 확인합니다.</p>
         </div>
-        <el-tag type="primary">OpenWeather Forecast API</el-tag>
+        <el-tag type="primary" effect="dark">Forecast Studio</el-tag>
       </div>
     </template>
 
@@ -67,7 +67,7 @@ watch(selectedCity, (newCity) => {
           >
             <el-card shadow="hover" class="time-item-card">
               <div class="time-badge">
-                <el-tag type="info" size="small">{{ item.time }}</el-tag>
+                <el-tag type="info" size="small" effect="plain">⏱️ {{ item.time }}</el-tag>
               </div>
 
               <div class="weather-info-box">
@@ -87,8 +87,8 @@ watch(selectedCity, (newCity) => {
               <el-divider style="margin: 12px 0" />
 
               <div class="detail-mini-stats">
-                <span>💧 습도: {{ item.humidity }}%</span>
-                <span>🍃 풍속: {{ item.windSpeed }}m/s</span>
+                <span>💧 습도 {{ item.humidity }}%</span>
+                <span>🍃 풍속 {{ item.windSpeed }}m/s</span>
               </div>
             </el-card>
           </el-col>
@@ -100,7 +100,8 @@ watch(selectedCity, (newCity) => {
 
 <style scoped>
 .forecast-card {
-  border-radius: 8px;
+  border-radius: 16px;
+  background: #ffffff;
 }
 
 .forecast-header {
@@ -111,7 +112,9 @@ watch(selectedCity, (newCity) => {
 
 .forecast-header h3 {
   margin: 0 0 4px 0;
-  font-size: 1.15rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0f172a;
 }
 
 .sub-desc {
@@ -125,7 +128,14 @@ watch(selectedCity, (newCity) => {
 }
 
 .time-item-card {
-  border-radius: 8px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.time-item-card:hover {
+  transform: translateY(-2px);
+  border-color: #38bdf8;
 }
 
 .time-badge {
@@ -139,8 +149,8 @@ watch(selectedCity, (newCity) => {
 }
 
 .weather-icon {
-  width: 50px;
-  height: 50px;
+  width: 54px;
+  height: 54px;
 }
 
 .temp-group {
@@ -149,14 +159,15 @@ watch(selectedCity, (newCity) => {
 }
 
 .main-temp {
-  font-size: 1.3rem;
-  font-weight: 700;
+  font-size: 1.4rem;
+  font-weight: 800;
   color: #0284c7;
 }
 
 .desc-text {
   font-size: 0.85rem;
   color: #475569;
+  font-weight: 600;
 }
 
 .detail-mini-stats {
@@ -164,5 +175,6 @@ watch(selectedCity, (newCity) => {
   justify-content: space-between;
   font-size: 0.8rem;
   color: #64748b;
+  font-weight: 500;
 }
 </style>
