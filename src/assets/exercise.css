@@ -54,6 +54,20 @@ button {
   border-color: #d1d5db;
 }
 
+/* Skeleton Loading Box */
+.skeleton-box {
+  background: var(--toss-canvas);
+  border: 1px solid var(--toss-border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+.el-skeleton {
+  --el-skeleton-color: #f2f4f6;
+  --el-skeleton-to-color: #e5e8eb;
+}
+
 /* Toss Badge Component */
 .toss-badge {
   display: inline-flex;

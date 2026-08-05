@@ -106,7 +106,12 @@ watch(searchQuery, (nextQuery) => {
   <div class="home-container">
     <h1 class="sr-only">전국 현재 날씨</h1>
 
-    <section v-if="heroCity" class="hero-card" aria-labelledby="hero-city-title">
+    <!-- 로딩 중일 때 부드러운 스켈레톤 히어로 카드 -->
+    <div v-if="isLoading && !heroCity" class="skeleton-box">
+      <el-skeleton :rows="4" animated />
+    </div>
+
+    <section v-else-if="heroCity" class="hero-card" aria-labelledby="hero-city-title">
       <div class="hero-top">
         <div>
           <p class="eyebrow">전국 주요 도시 현재 날씨</p>
@@ -208,8 +213,8 @@ watch(searchQuery, (nextQuery) => {
       />
       <StatusAlert :message="partialFailureMessage" type="warning" />
 
-      <div v-if="isLoading" class="skeleton-box" aria-label="현재 날씨를 불러오는 중">
-        <el-skeleton :rows="5" animated />
+      <div v-if="isLoading && weatherList.length === 0" class="skeleton-box" aria-label="현재 날씨를 불러오는 중">
+        <el-skeleton :rows="4" animated />
       </div>
 
       <template v-else-if="!errorMessage">
