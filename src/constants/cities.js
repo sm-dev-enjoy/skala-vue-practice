@@ -1,0 +1,146 @@
+export const cities = [
+  {
+    id: 'city_01',
+    name: '서울',
+    fullName: '서울특별시',
+    englishName: 'Seoul',
+    key: 'seoul',
+    lat: 37.5665,
+    lon: 126.978,
+  },
+  {
+    id: 'city_02',
+    name: '수원',
+    fullName: '경기도 수원시',
+    englishName: 'Suwon',
+    key: 'suwon',
+    lat: 37.2636,
+    lon: 127.0286,
+  },
+  {
+    id: 'city_03',
+    name: '부산',
+    fullName: '부산광역시',
+    englishName: 'Busan',
+    key: 'busan',
+    lat: 35.1796,
+    lon: 129.0756,
+  },
+  {
+    id: 'city_04',
+    name: '인천',
+    fullName: '인천광역시',
+    englishName: 'Incheon',
+    key: 'incheon',
+    lat: 37.4563,
+    lon: 126.7052,
+  },
+  {
+    id: 'city_05',
+    name: '대구',
+    fullName: '대구광역시',
+    englishName: 'Daegu',
+    key: 'daegu',
+    lat: 35.8714,
+    lon: 128.6014,
+  },
+  {
+    id: 'city_06',
+    name: '대전',
+    fullName: '대전광역시',
+    englishName: 'Daejeon',
+    key: 'daejeon',
+    lat: 36.351,
+    lon: 127.385,
+  },
+  {
+    id: 'city_07',
+    name: '광주',
+    fullName: '광주광역시',
+    englishName: 'Gwangju',
+    key: 'gwangju',
+    lat: 35.1595,
+    lon: 126.8526,
+  },
+  {
+    id: 'city_08',
+    name: '울산',
+    fullName: '울산광역시',
+    englishName: 'Ulsan',
+    key: 'ulsan',
+    lat: 35.5384,
+    lon: 129.3114,
+  },
+  {
+    id: 'city_09',
+    name: '제주',
+    fullName: '제주특별자치도 제주시',
+    englishName: 'Jeju',
+    key: 'jeju',
+    lat: 33.4996,
+    lon: 126.5312,
+  },
+  {
+    id: 'city_10',
+    name: '춘천',
+    fullName: '강원특별자치도 춘천시',
+    englishName: 'Chuncheon',
+    key: 'chuncheon',
+    lat: 37.8813,
+    lon: 127.7298,
+  },
+  {
+    id: 'city_11',
+    name: '강릉',
+    fullName: '강원특별자치도 강릉시',
+    englishName: 'Gangneung',
+    key: 'gangneung',
+    lat: 37.7519,
+    lon: 128.8761,
+  },
+  {
+    id: 'city_12',
+    name: '전주',
+    fullName: '전북특별자치도 전주시',
+    englishName: 'Jeonju',
+    key: 'jeonju',
+    lat: 35.8242,
+    lon: 127.148,
+  },
+  {
+    id: 'city_13',
+    name: '청주',
+    fullName: '충청북도 청주시',
+    englishName: 'Cheongju',
+    key: 'cheongju',
+    lat: 36.6424,
+    lon: 127.489,
+  },
+  {
+    id: 'city_14',
+    name: '창원',
+    fullName: '경상남도 창원시',
+    englishName: 'Changwon',
+    key: 'changwon',
+    lat: 35.228,
+    lon: 128.6811,
+  },
+]
+
+export const cityById = Object.fromEntries(cities.map((city) => [city.id, city]))
+export const cityByKey = Object.fromEntries(cities.map((city) => [city.key, city]))
+
+export const stationOptions = cities.map((city) => ({
+  label: city.name,
+  value: city.id,
+}))
+
+export const forecastCityOptions = cities.map((city) => ({
+  label: city.name,
+  value: city.englishName,
+}))
+
+export const airCityOptions = cities.map((city) => ({
+  label: city.name,
+  value: city.key,
+}))

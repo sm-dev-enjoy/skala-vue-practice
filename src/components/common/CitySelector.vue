@@ -1,4 +1,6 @@
 <script setup>
+import { useId } from 'vue'
+
 defineProps({
   modelValue: {
     type: String,
@@ -6,11 +8,11 @@ defineProps({
   },
   options: {
     type: Array,
-    default: () => [
-      { label: '서울', value: 'seoul' },
-      { label: '수원', value: 'suwon' },
-      { label: '부산', value: 'busan' },
-    ],
+    default: () => [],
+  },
+  disabledValues: {
+    type: Array,
+    default: () => [],
   },
   label: {
     type: String,
@@ -19,97 +21,146 @@ defineProps({
 })
 
 const emit = defineEmits(['update:modelValue'])
+const labelId = useId()
+const selectId = useId()
 
-const handleSelect = (val) => {
-  emit('update:modelValue', val)
+const handleSelect = (value) => {
+  emit('update:modelValue', value)
 }
 </script>
 
 <template>
-  <div class="toss-city-selector">
-    <span class="selector-label">{{ label }}</span>
-    <div class="chips-group">
+  <section class="city-selector" :aria-labelledby="labelId">
+    <span :id="labelId" class="selector-label">{{ label }}</span>
+
+    <div class="chips-group" role="group" :aria-labelledby="labelId">
       <button
         v-for="item in options"
         :key="item.value"
-        class="toss-chip"
+        type="button"
+        class="city-chip"
         :class="{ active: modelValue === item.value }"
+        :aria-pressed="modelValue === item.value"
+        :disabled="disabledValues.includes(item.value)"
         @click="handleSelect(item.value)"
       >
         {{ item.label }}
       </button>
     </div>
-  </div>
+
+    <div class="mobile-select-wrap">
+      <label :for="selectId" class="sr-only">{{ label }} 선택</label>
+      <select
+        :id="selectId"
+        class="mobile-select"
+        :value="modelValue"
+        @change="handleSelect($event.target.value)"
+      >
+        <option
+          v-for="item in options"
+          :key="item.value"
+          :value="item.value"
+          :disabled="disabledValues.includes(item.value)"
+        >
+          {{ item.label }}
+        </option>
+      </select>
+    </div>
+  </section>
 </template>
 
 <style scoped>
-.toss-city-selector {
+.city-selector {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
-  margin-bottom: 20px;
+  border: 1px solid var(--toss-border);
+  border-radius: 14px;
   background: var(--toss-canvas);
   padding: 12px 16px;
-  border-radius: 14px;
-  border: 1px solid var(--toss-border);
-  overflow: hidden;
 }
 
 .selector-label {
-  font-size: 14px;
-  font-weight: 600;
+  min-height: 40px;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
   color: var(--toss-body);
+  font-size: 14px;
+  font-weight: 800;
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .chips-group {
   display: flex;
+  flex: 1;
+  flex-wrap: wrap;
   gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
-  padding-bottom: 2px;
 }
 
-.chips-group::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
-}
-
-.toss-chip {
+.city-chip {
+  min-height: 40px;
+  border: 1px solid transparent;
+  border-radius: 9px;
   background: var(--toss-surface);
   color: var(--toss-body);
-  border: none;
-  padding: 7px 14px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
   cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: all 0.15s ease;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 0 13px;
 }
 
-.toss-chip:hover {
-  background: #e2e8f0;
+.city-chip:hover {
+  border-color: #b9d4f4;
+  background: var(--toss-weak-bg);
 }
 
-.toss-chip.active {
+.city-chip.active {
+  border-color: #8dbcf1;
   background: var(--toss-weak-bg);
   color: var(--toss-weak-fg);
 }
 
-/* 모바일 분기 반응형 처리 */
+.city-chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.mobile-select-wrap {
+  display: none;
+  width: 100%;
+}
+
+.mobile-select {
+  width: 100%;
+  min-height: 44px;
+  appearance: auto;
+  border: 1px solid #aeb8c3;
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--toss-foreground);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 0 12px;
+}
+
 @media (max-width: 640px) {
-  .toss-city-selector {
+  .city-selector {
     flex-direction: column;
-    align-items: flex-start;
     gap: 8px;
     padding: 12px 14px;
   }
 
+  .selector-label {
+    min-height: auto;
+  }
+
   .chips-group {
-    width: 100%;
+    display: none;
+  }
+
+  .mobile-select-wrap {
+    display: block;
   }
 }
 </style>

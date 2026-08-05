@@ -1,5 +1,7 @@
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { forecastCityOptions } from '@/constants/cities'
 import { useConfigStore } from '@/stores/configStore'
 import { useForecast } from '@/composables/useForecast'
 import { useWeatherApi } from '@/composables/useWeatherApi'
@@ -7,382 +9,534 @@ import CitySelector from '../components/common/CitySelector.vue'
 import StatusAlert from '../components/common/StatusAlert.vue'
 import SvgIcon from '../components/common/SvgIcon.vue'
 
+const route = useRoute()
+const router = useRouter()
 const configStore = useConfigStore()
-const selectedCity = ref('Seoul')
+const validCityValues = new Set(forecastCityOptions.map((city) => city.value))
 
-const { isLoading, errorMessage, forecastList, fetchForecast } = useForecast()
+const initialCity = validCityValues.has(route.query.city) ? route.query.city : 'Seoul'
+const selectedCity = ref(initialCity)
+const selectedDateFilter = ref(typeof route.query.date === 'string' ? route.query.date : '')
+
+const { isLoading, errorMessage, forecastList, observedAt, fetchForecast } = useForecast()
 const { formatTemperature } = useWeatherApi()
 
-const selectedDateFilter = ref('all')
+let loadRequestId = 0
 
-// 대한민국 14개 주요 도시 셀렉터 옵션
-const cityOptions = [
-  { label: '서울', value: 'Seoul' },
-  { label: '부산', value: 'Busan' },
-  { label: '인천', value: 'Incheon' },
-  { label: '대구', value: 'Daegu' },
-  { label: '대전', value: 'Daejeon' },
-  { label: '광주', value: 'Gwangju' },
-  { label: '울산', value: 'Ulsan' },
-  { label: '수원', value: 'Suwon' },
-  { label: '제주', value: 'Jeju' },
-  { label: '춘천', value: 'Chuncheon' },
-  { label: '강릉', value: 'Gangneung' },
-  { label: '전주', value: 'Jeonju' },
-  { label: '청주', value: 'Cheongju' },
-  { label: '창원', value: 'Changwon' },
-]
-
-const filteredForecastList = computed(() => {
-  if (selectedDateFilter.value === 'all') return forecastList.value
-  return forecastList.value.filter((item) => item.time.startsWith(selectedDateFilter.value))
+const datePartsFormatter = new Intl.DateTimeFormat('ko-KR', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  timeZone: 'Asia/Seoul',
 })
 
-const availableDates = computed(() => {
-  const dates = new Set()
-  forecastList.value.forEach((item) => {
-    const datePart = item.time.split(' ')[0]
-    if (datePart) dates.add(datePart)
-  })
-  return Array.from(dates)
-})
+const getDateKey = (timestamp) => {
+  if (!Number.isFinite(timestamp)) return ''
 
-const formatDateLabel = (dateStr) => {
-  if (!dateStr || dateStr === 'all') return '전체'
-  const parts = dateStr.split('-')
-  if (parts.length === 3) {
-    const month = parseInt(parts[1], 10)
-    const day = parseInt(parts[2], 10)
-    return `${month}/${day}`
-  }
-  return dateStr
+  const parts = Object.fromEntries(
+    datePartsFormatter
+      .formatToParts(new Date(timestamp * 1000))
+      .filter((part) => part.type !== 'literal')
+      .map((part) => [part.type, part.value]),
+  )
+
+  return `${parts.year}-${parts.month}-${parts.day}`
 }
 
-const formatTimeOnly = (dtTxt) => {
-  if (!dtTxt) return ''
-  const parts = dtTxt.split(' ')
-  if (parts.length >= 2) {
-    const timePart = parts[1].substring(0, 5)
-    return `${parts[0].substring(5)} ${timePart}`
-  }
-  return dtTxt
+const availableDates = computed(() => {
+  const dates = new Map()
+
+  forecastList.value.forEach((item) => {
+    const key = getDateKey(item.timestamp)
+    if (key && !dates.has(key)) dates.set(key, item.timestamp)
+  })
+
+  return Array.from(dates, ([key, timestamp]) => ({ key, timestamp }))
+})
+
+const filteredForecastList = computed(() => {
+  if (!selectedDateFilter.value) return forecastList.value
+  return forecastList.value.filter(
+    (item) => getDateKey(item.timestamp) === selectedDateFilter.value,
+  )
+})
+
+const selectedCityLabel = computed(
+  () =>
+    forecastCityOptions.find((city) => city.value === selectedCity.value)?.label ?? '선택한 도시',
+)
+
+const selectedDateLabel = computed(() => {
+  if (!selectedDateFilter.value) return '전체 예보'
+  const selectedDate = availableDates.value.find((date) => date.key === selectedDateFilter.value)
+  return selectedDate ? formatDateLabel(selectedDate.timestamp) : '선택한 날짜'
+})
+
+const formattedLastUpdated = computed(() => {
+  if (!observedAt.value) return ''
+
+  return new Intl.DateTimeFormat('ko-KR', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'Asia/Seoul',
+  }).format(observedAt.value)
+})
+
+const formatDateLabel = (timestamp) => {
+  if (!Number.isFinite(timestamp)) return '날짜 정보 없음'
+
+  return new Intl.DateTimeFormat('ko-KR', {
+    month: 'long',
+    day: 'numeric',
+    weekday: 'short',
+    timeZone: 'Asia/Seoul',
+  }).format(new Date(timestamp * 1000))
+}
+
+const formatTimeOnly = (timestamp) => {
+  if (!Number.isFinite(timestamp)) return '시간 정보 없음'
+
+  return new Intl.DateTimeFormat('ko-KR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'Asia/Seoul',
+  }).format(new Date(timestamp * 1000))
 }
 
 const getWeatherStateTheme = (description) => {
   const desc = description ?? ''
-  
+
   if (desc.includes('맑음') || desc.includes('Clear') || desc.includes('Sun')) {
-    return {
-      label: desc,
-      icon: 'sun',
-      bg: '#fff7ed',
-      color: '#c2410c',
-      border: '#ffedd5',
-      iconColor: '#ea580c',
-    }
+    return { icon: 'sun', className: 'sunny' }
   }
-  if (desc.includes('비') || desc.includes('Rain') || desc.includes('소나기') || desc.includes('Drizzle')) {
-    return {
-      label: desc,
-      icon: 'rain',
-      bg: '#f0f9ff',
-      color: '#0284c7',
-      border: '#bae6fd',
-      iconColor: '#0284c7',
-    }
+  if (
+    desc.includes('비') ||
+    desc.includes('Rain') ||
+    desc.includes('소나기') ||
+    desc.includes('Drizzle')
+  ) {
+    return { icon: 'rain', className: 'rainy' }
   }
-  return {
-    label: desc,
-    icon: 'cloud',
-    bg: '#f1f5f9',
-    color: '#475569',
-    border: '#e2e8f0',
-    iconColor: '#64748b',
+  return { icon: 'cloud', className: 'cloudy' }
+}
+
+const syncQuery = () => {
+  const query = {}
+  if (selectedCity.value !== 'Seoul') query.city = selectedCity.value
+  if (selectedDateFilter.value) query.date = selectedDateFilter.value
+
+  router.replace({ path: '/forecast', query })
+}
+
+const loadForecast = async () => {
+  const requestId = ++loadRequestId
+  const list = await fetchForecast(selectedCity.value)
+
+  if (requestId !== loadRequestId || list.length === 0) return
+
+  const availableKeys = new Set(list.map((item) => getDateKey(item.timestamp)))
+  if (!availableKeys.has(selectedDateFilter.value)) {
+    selectedDateFilter.value = getDateKey(list[0]?.timestamp)
   }
 }
 
-onMounted(() => {
-  fetchForecast(selectedCity.value)
+onMounted(loadForecast)
+
+watch(selectedCity, () => {
+  loadForecast()
+  syncQuery()
 })
 
-watch(selectedCity, (newCity) => {
-  selectedDateFilter.value = 'all'
-  fetchForecast(newCity)
-})
+watch(selectedDateFilter, syncQuery)
+
+watch(
+  () => route.query,
+  (query) => {
+    const routeCity = validCityValues.has(query.city) ? query.city : 'Seoul'
+    const routeDate = typeof query.date === 'string' ? query.date : ''
+
+    if (routeCity !== selectedCity.value) selectedCity.value = routeCity
+    if (routeDate !== selectedDateFilter.value) selectedDateFilter.value = routeDate
+  },
+)
 </script>
 
 <template>
-  <div class="toss-forecast-container">
-    <div class="page-title-box">
-      <h2 class="page-title">5일 기상 예보</h2>
-      <p class="page-desc">OpenWeather API 기반 전국 14개 도시의 5일간 단기 기상 예측 데이터입니다.</p>
-    </div>
+  <div class="forecast-container">
+    <header class="page-title-box">
+      <h1 class="page-title">5일 기상 예보</h1>
+      <p class="page-desc">
+        도시와 날짜를 고르면 3시간 단위 예보를 한국 표준시로 확인할 수 있습니다.
+      </p>
+    </header>
 
-    <!-- 관측 지역 선택 (14개 도시 모바일 반응형 완벽 보강) -->
-    <CitySelector
-      v-model="selectedCity"
-      :options="cityOptions"
-      label="관측 지역"
-    />
+    <CitySelector v-model="selectedCity" :options="forecastCityOptions" label="예보 지역" />
 
-    <!-- 날짜별 필터 탭 -->
-    <div v-if="availableDates.length > 0" class="date-filter-bar">
-      <span class="filter-label">예보 날짜 선택:</span>
-      <div class="date-chips">
+    <section v-if="availableDates.length" class="date-filter-bar" aria-label="예보 날짜 선택">
+      <span class="filter-label">날짜</span>
+      <div class="date-chips" role="group" aria-label="예보 날짜">
         <button
+          type="button"
           class="date-chip"
-          :class="{ active: selectedDateFilter === 'all' }"
-          @click="selectedDateFilter = 'all'"
+          :class="{ active: !selectedDateFilter }"
+          :aria-pressed="!selectedDateFilter"
+          @click="selectedDateFilter = ''"
         >
-          전체 (5일)
+          전체 예보
         </button>
         <button
-          v-for="d in availableDates"
-          :key="d"
+          v-for="date in availableDates"
+          :key="date.key"
+          type="button"
           class="date-chip"
-          :class="{ active: selectedDateFilter === d }"
-          @click="selectedDateFilter = d"
+          :class="{ active: selectedDateFilter === date.key }"
+          :aria-pressed="selectedDateFilter === date.key"
+          @click="selectedDateFilter = date.key"
         >
-          {{ formatDateLabel(d) }}
+          {{ formatDateLabel(date.timestamp) }}
         </button>
       </div>
-    </div>
+    </section>
 
-    <div v-if="isLoading" class="skeleton-box">
-      <el-skeleton :rows="6" animated />
-    </div>
+    <section
+      class="forecast-results"
+      :aria-busy="isLoading"
+      aria-labelledby="forecast-results-title"
+    >
+      <div class="results-heading">
+        <div>
+          <h2 id="forecast-results-title">{{ selectedCityLabel }} · {{ selectedDateLabel }}</h2>
+          <p v-if="formattedLastUpdated">마지막으로 불러온 시각 · {{ formattedLastUpdated }}</p>
+        </div>
+        <span v-if="filteredForecastList.length" class="results-count">
+          {{ filteredForecastList.length }}개 시간대
+        </span>
+      </div>
 
-    <template v-else>
-      <StatusAlert :message="errorMessage" type="error" />
+      <StatusAlert
+        :message="errorMessage"
+        type="error"
+        retryable
+        :is-retrying="isLoading"
+        @retry="loadForecast"
+      />
 
-      <div v-if="filteredForecastList.length > 0" class="forecast-list">
-        <div
-          v-for="(item, index) in filteredForecastList"
-          :key="index"
-          class="toss-forecast-card"
-        >
+      <div v-if="isLoading" class="skeleton-box" aria-label="기상 예보를 불러오는 중">
+        <el-skeleton :rows="6" animated />
+      </div>
+
+      <div v-else-if="filteredForecastList.length" class="forecast-list" aria-live="polite">
+        <article v-for="item in filteredForecastList" :key="item.timestamp" class="forecast-card">
           <div class="item-left">
-            <span class="time-text">{{ formatTimeOnly(item.time) }}</span>
-
+            <time
+              class="time-text"
+              :datetime="
+                Number.isFinite(item.timestamp)
+                  ? new Date(item.timestamp * 1000).toISOString()
+                  : undefined
+              "
+            >
+              {{ formatTimeOnly(item.timestamp) }}
+            </time>
             <div
               class="weather-state-chip"
-              :style="{
-                backgroundColor: getWeatherStateTheme(item.description).bg,
-                color: getWeatherStateTheme(item.description).color,
-                borderColor: getWeatherStateTheme(item.description).border,
-              }"
+              :class="getWeatherStateTheme(item.description).className"
             >
               <SvgIcon
                 :name="getWeatherStateTheme(item.description).icon"
-                size="15"
-                :color="getWeatherStateTheme(item.description).iconColor"
+                size="16"
+                color="currentColor"
+                aria-hidden="true"
               />
-              <span class="chip-label">{{ getWeatherStateTheme(item.description).label }}</span>
+              <span>{{ item.description }}</span>
             </div>
           </div>
 
           <div class="item-right">
-            <div class="mini-metrics">
-              <span class="m-item">
-                <SvgIcon name="droplet" size="13" color="#8b95a1" />
-                {{ item.humidity }}%
-              </span>
-              <span class="m-item">
-                <SvgIcon name="wind" size="13" color="#8b95a1" />
-                {{ item.windSpeed }}m/s
-              </span>
-            </div>
+            <dl class="mini-metrics">
+              <div>
+                <dt>
+                  <SvgIcon name="droplet" size="14" color="currentColor" aria-hidden="true" /> 습도
+                </dt>
+                <dd>
+                  {{ item.humidity ?? '—' }}<template v-if="item.humidity !== null">%</template>
+                </dd>
+              </div>
+              <div>
+                <dt>
+                  <SvgIcon name="wind" size="14" color="currentColor" aria-hidden="true" /> 풍속
+                </dt>
+                <dd>
+                  {{ item.windSpeed ?? '—' }}<template v-if="item.windSpeed !== null">m/s</template>
+                </dd>
+              </div>
+              <div v-if="item.precipitationProbability !== null">
+                <dt>강수 확률</dt>
+                <dd>{{ Math.round(item.precipitationProbability * 100) }}%</dd>
+              </div>
+            </dl>
             <div class="temp-text">
-              {{ formatTemperature(item.temp) }}{{ configStore.unitSymbol }}
+              {{ formatTemperature(item.temp) ?? '—'
+              }}<span v-if="formatTemperature(item.temp) !== null">{{
+                configStore.unitSymbol
+              }}</span>
             </div>
           </div>
-        </div>
+        </article>
       </div>
 
       <el-empty
         v-else-if="!errorMessage"
-        description="해당 날짜의 예보 정보가 없습니다."
+        description="해당 날짜의 예보 정보가 없습니다. 다른 날짜를 선택해 보세요."
         :image-size="80"
       />
-    </template>
+    </section>
   </div>
 </template>
 
 <style scoped>
-.toss-forecast-container {
+.forecast-container,
+.forecast-results {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.page-title-box {
-  margin-bottom: 4px;
-}
-
 .page-title {
-  margin: 0 0 4px 0;
-  font-size: 22px;
-  font-weight: 700;
+  margin: 0 0 4px;
   color: var(--toss-foreground);
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
 }
 
-.page-desc {
+.page-desc,
+.results-heading p {
   margin: 0;
-  font-size: 14px;
   color: var(--toss-muted);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .date-filter-bar {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
-  background: var(--toss-canvas);
   border: 1px solid var(--toss-border);
   border-radius: 14px;
+  background: var(--toss-canvas);
   padding: 12px 16px;
 }
 
 .filter-label {
-  font-size: 14px;
-  font-weight: 600;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
   color: var(--toss-body);
-  white-space: nowrap;
-  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 800;
 }
 
 .date-chips {
   display: flex;
+  flex: 1;
+  flex-wrap: wrap;
   gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.date-chips::-webkit-scrollbar {
-  display: none;
 }
 
 .date-chip {
+  min-height: 40px;
+  border: 1px solid transparent;
+  border-radius: 9px;
   background: var(--toss-surface);
   color: var(--toss-body);
-  border: none;
-  padding: 7px 14px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
   cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: all 0.15s ease;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 0 12px;
 }
 
+.date-chip:hover,
 .date-chip.active {
+  border-color: #8dbcf1;
   background: var(--toss-weak-bg);
   color: var(--toss-weak-fg);
+}
+
+.results-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.results-heading h2 {
+  margin: 0 0 3px;
+  color: var(--toss-foreground);
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.results-count {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--toss-surface);
+  color: var(--toss-body);
+  font-size: 13px;
+  font-weight: 800;
+  padding: 7px 10px;
 }
 
 .forecast-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
-.toss-forecast-card {
-  background: var(--toss-canvas);
+.forecast-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
   border: 1px solid var(--toss-border);
   border-radius: 16px;
-  padding: 18px 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: all 0.15s ease;
+  background: var(--toss-canvas);
+  padding: 16px 20px;
 }
 
-.toss-forecast-card:hover {
-  border-color: #b0c4de;
-  transform: translateY(-1px);
+.item-left,
+.item-right,
+.weather-state-chip,
+.mini-metrics dt {
+  display: flex;
+  align-items: center;
 }
 
 .item-left {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
+  min-width: 150px;
+  flex: 1;
+  gap: 12px;
 }
 
 .time-text {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--toss-muted);
+  color: var(--toss-body);
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .weather-state-chip {
-  display: inline-flex;
-  align-items: center;
   gap: 6px;
-  padding: 5px 12px;
-  border-radius: 10px;
   border: 1px solid transparent;
+  border-radius: 9px;
   font-size: 14px;
-  font-weight: 700;
-  line-height: 1.2;
+  font-weight: 800;
+  padding: 6px 10px;
 }
 
-.chip-label {
-  font-size: 14px;
+.weather-state-chip.sunny {
+  border-color: #fed7aa;
+  background: #fff7ed;
+  color: #a64409;
+}
+
+.weather-state-chip.rainy {
+  border-color: #a5d8f6;
+  background: #eff8ff;
+  color: #086697;
+}
+
+.weather-state-chip.cloudy {
+  border-color: #d5dce5;
+  background: #f1f5f9;
+  color: #475569;
 }
 
 .item-right {
-  display: flex;
-  align-items: center;
-  gap: 24px;
+  justify-content: flex-end;
+  gap: 22px;
 }
 
 .mini-metrics {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  font-size: 13px;
-  color: var(--toss-muted);
-  gap: 4px;
-  font-weight: 500;
+  justify-content: flex-end;
+  gap: 12px;
+  margin: 0;
 }
 
-.m-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+.mini-metrics div {
+  color: var(--toss-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mini-metrics dt {
+  gap: 3px;
+}
+
+.mini-metrics dd {
+  margin: 2px 0 0;
+  color: var(--toss-body);
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .temp-text {
-  font-size: 26px;
-  font-weight: 700;
   color: var(--toss-blue);
-  letter-spacing: -0.5px;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.7px;
+  white-space: nowrap;
+}
+
+.temp-text span {
+  margin-left: 2px;
+  color: var(--toss-muted);
+  font-size: 15px;
 }
 
 @media (max-width: 640px) {
   .date-filter-bar {
     flex-direction: column;
-    align-items: flex-start;
     gap: 8px;
     padding: 12px 14px;
   }
 
-  .date-chips {
-    width: 100%;
+  .results-heading {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
-  .toss-forecast-card {
+  .forecast-card,
+  .item-left,
+  .item-right {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .forecast-card {
+    gap: 14px;
     padding: 16px;
   }
 
+  .item-left,
   .item-right {
-    gap: 12px;
+    width: 100%;
+  }
+
+  .item-right {
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .mini-metrics {
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
 
   .temp-text {
-    font-size: 22px;
+    font-size: 26px;
   }
 }
 </style>

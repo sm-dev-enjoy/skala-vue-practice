@@ -11,7 +11,6 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['select-card', 'click-detail'])
 const configStore = useConfigStore()
 const { formatTemperature } = useWeatherApi()
 
@@ -24,145 +23,174 @@ const weatherIconName = computed(() => {
   return 'cloud'
 })
 
-// 카드 전체 클릭 시 상세 페이지 이동 및 부모 통지
-const handleCardClick = () => {
-  emit('select-card', `${props.cityItem.name} 관측소로 이동합니다.`)
-  emit('click-detail', props.cityItem.id, props.cityItem.name, props.cityItem.status)
-}
+const temperatureLabel = computed(() => {
+  const temperature = props.cityItem?.temp
+  if (!Number.isFinite(temperature)) return '온도 정보 없음'
+  if (temperature >= 28) return '더움'
+  if (temperature >= 20) return '온화함'
+  return '선선함'
+})
 </script>
 
 <template>
-  <div
-    class="toss-weather-card"
-    @click="handleCardClick"
+  <RouterLink
+    class="weather-card"
+    :to="`/weather/${cityItem.id}`"
+    :aria-label="`${cityItem.name} 현재 날씨 상세 보기`"
   >
     <div class="card-top-row">
       <div class="status-icon-box">
-        <SvgIcon :name="weatherIconName" size="22" color="#3182f6" />
+        <SvgIcon :name="weatherIconName" size="22" color="#1469d8" aria-hidden="true" />
         <span class="status-label">{{ cityItem.status }}</span>
       </div>
 
-      <span v-if="cityItem.temp >= 28" class="toss-badge danger">고온 경보</span>
-      <span v-else-if="cityItem.temp >= 20" class="toss-badge">적정 기온</span>
-      <span v-else class="toss-badge">저온</span>
+      <span class="weather-badge">{{ temperatureLabel }}</span>
     </div>
 
     <div class="card-middle-row">
       <div class="city-box">
-        <h4 class="city-name">{{ cityItem.name }}</h4>
-        <span class="city-sub">실시간 기상 관측</span>
+        <h3 class="city-name">{{ cityItem.name }}</h3>
+        <span class="city-sub">{{ cityItem.fullName }}</span>
       </div>
 
-      <div class="right-temp">
-        <span class="temp-number">{{ displayTemp }}</span>
-        <span class="temp-unit">{{ configStore.unitSymbol }}</span>
+      <div
+        class="right-temp"
+        :aria-label="`현재 기온 ${displayTemp ?? '정보 없음'}${configStore.unitSymbol}`"
+      >
+        <span class="temp-number">{{ displayTemp ?? '—' }}</span>
+        <span v-if="displayTemp !== null" class="temp-unit">{{ configStore.unitSymbol }}</span>
       </div>
     </div>
 
     <div class="card-bottom">
-      <div class="toss-btn-text">
-        <span>상세 페이지 보기</span>
-        <SvgIcon name="arrow-right" size="14" color="#3182f6" />
-      </div>
+      <span class="card-link-text">
+        상세 날씨 보기
+        <SvgIcon name="arrow-right" size="15" color="#1469d8" aria-hidden="true" />
+      </span>
     </div>
-  </div>
+  </RouterLink>
 </template>
 
 <style scoped>
-.toss-weather-card {
-  background: var(--toss-canvas);
-  border: 1px solid var(--toss-border);
-  border-radius: 16px;
-  padding: 20px;
-  cursor: pointer;
-  transition: all 0.15s ease-in-out;
+.weather-card {
   display: flex;
+  min-height: 176px;
   flex-direction: column;
   justify-content: space-between;
-  user-select: none;
+  border: 1px solid var(--toss-border);
+  border-radius: 16px;
+  background: var(--toss-canvas);
+  color: inherit;
+  padding: 20px;
+  transition:
+    border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out,
+    transform 0.15s ease-in-out;
 }
 
-.toss-weather-card:hover {
-  border-color: #3182f6;
+.weather-card:hover {
+  border-color: #6ba5e8;
+  box-shadow: 0 6px 20px rgba(20, 105, 216, 0.1);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(49, 130, 246, 0.08);
 }
 
-.toss-weather-card:active {
-  transform: scale(0.985);
-  background: #f8fafc;
+.weather-card:active {
+  transform: scale(0.99);
+}
+
+.card-top-row,
+.card-middle-row,
+.card-bottom,
+.status-icon-box,
+.right-temp,
+.card-link-text {
+  display: flex;
+  align-items: center;
+}
+
+.card-top-row,
+.card-middle-row {
+  justify-content: space-between;
 }
 
 .card-top-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 14px;
 }
 
 .status-icon-box {
-  display: flex;
-  align-items: center;
   gap: 6px;
+  min-width: 0;
 }
 
 .status-label {
-  font-size: 13px;
-  font-weight: 600;
+  overflow: hidden;
   color: var(--toss-body);
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.weather-badge {
+  flex: 0 0 auto;
+  border-radius: 8px;
+  background: var(--toss-weak-bg);
+  color: var(--toss-weak-fg);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 8px;
 }
 
 .card-middle-row {
-  display: flex;
-  justify-content: space-between;
   align-items: flex-end;
+  gap: 12px;
   margin-bottom: 16px;
 }
 
 .city-name {
   margin: 0;
-  font-size: 20px;
-  font-weight: 700;
   color: var(--toss-foreground);
+  font-size: 20px;
+  font-weight: 800;
 }
 
 .city-sub {
-  font-size: 12px;
+  display: block;
+  margin-top: 2px;
   color: var(--toss-muted);
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .right-temp {
-  display: flex;
+  flex: 0 0 auto;
   align-items: baseline;
 }
 
 .temp-number {
-  font-size: 32px;
-  font-weight: 700;
   color: var(--toss-blue);
+  font-size: 32px;
+  font-weight: 800;
   letter-spacing: -1px;
 }
 
 .temp-unit {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--toss-muted);
   margin-left: 2px;
+  color: var(--toss-muted);
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .card-bottom {
-  display: flex;
   justify-content: flex-end;
   border-top: 1px solid var(--toss-border);
   padding-top: 12px;
 }
 
-.toss-btn-text {
+.card-link-text {
+  gap: 4px;
   color: var(--toss-blue);
   font-size: 14px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  font-weight: 800;
 }
 </style>

@@ -1,149 +1,216 @@
-<script setup>
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
-
-const handleGoHome = () => {
-  router.push('/')
-}
-</script>
-
 <template>
-  <div class="toss-about-container">
-    <div class="page-title-box">
-      <h2 class="page-title">서비스 소개</h2>
-      <p class="page-desc">날씨 인사이트가 제공하는 서비스와 기능을 소개합니다.</p>
-    </div>
+  <div class="about-container">
+    <header class="page-title-box">
+      <h1 class="page-title">서비스 안내</h1>
+      <p class="page-desc">날씨 인사이트에서 제공하는 정보의 범위와 확인 방법을 안내합니다.</p>
+    </header>
 
-    <div class="about-card">
+    <section class="about-card" aria-labelledby="about-intro-title">
       <div class="intro-banner">
-        <h3 class="intro-headline">한눈에 확인하는 기상 & 대기 환경 대시보드</h3>
-        <p class="intro-text">
-          날씨 인사이트는 매일의 일상과 야외 활동을 차질 없이 준비할 수 있도록<br />
-          전국 주요 지역의 실시간 날씨, 5일간의 기상 예보, 미세먼지 정보를 직관적으로 전달하는 서비스입니다.
+        <p class="eyebrow">오늘의 외출과 일정을 위한 빠른 확인</p>
+        <h2 id="about-intro-title">날씨, 예보, 대기질을 필요한 순서로 확인하세요</h2>
+        <p>
+          먼저 현재 날씨에서 도시를 고르고, 일정이 있다면 5일 예보에서 날짜별 시간대를 살펴보세요.
+          대기질 정보는 외출 전 참고용으로 함께 확인할 수 있습니다.
         </p>
       </div>
 
-      <div class="services-grid">
-        <div class="service-box">
-          <span class="s-title">실시간 기상 정보</span>
-          <p class="s-desc">
-            서울, 수원, 부산 등 주요 관측소의 현재 기온, 체감 온도, 습도, 풍속 정보를 실시간으로 확인할 수 있습니다.
-          </p>
+      <section aria-labelledby="features-title">
+        <h2 id="features-title" class="section-heading">할 수 있는 일</h2>
+        <div class="services-grid">
+          <article class="service-box">
+            <h3>현재 날씨 비교</h3>
+            <p>
+              14개 주요 도시의 현재 기온과 날씨 상태를 보고, 카드를 선택해 상세 관측값을 확인할 수
+              있습니다.
+            </p>
+          </article>
+          <article class="service-box">
+            <h3>날짜별 예보 확인</h3>
+            <p>
+              도시와 날짜를 선택하면 3시간 단위 기온, 습도, 풍속, 강수 확률을 한국 표준시 기준으로
+              볼 수 있습니다.
+            </p>
+          </article>
+          <article class="service-box">
+            <h3>대기질 참고</h3>
+            <p>
+              대기질 단계와 PM2.5·PM10 등 물질별 수치를 제공합니다. 건강 관련 판단은 공식 안내를
+              우선해 주세요.
+            </p>
+          </article>
+          <article class="service-box">
+            <h3>표시 단위 유지</h3>
+            <p>
+              상단에서 섭씨와 화씨를 전환할 수 있으며, 선택한 단위는 다음 방문 때에도 유지됩니다.
+            </p>
+          </article>
         </div>
+      </section>
 
-        <div class="service-box">
-          <span class="s-title">5일 단기 기상 예보</span>
-          <p class="s-desc">
-            3시간 단위로 세분화된 5일간의 기상 예측 데이터를 제공하여 주간 일정이나 주말 여행을 편리하게 계획할 수 있습니다.
-          </p>
-        </div>
+      <aside class="data-note" aria-labelledby="data-note-title">
+        <h2 id="data-note-title">데이터 관련 안내</h2>
+        <p>
+          날씨·예보·대기질 정보는 OpenWeather API 응답을 바탕으로 표시됩니다. 데이터의 갱신 시각과
+          제공 범위는 OpenWeather의 응답 및 요금제에 따라 달라질 수 있습니다.
+        </p>
+        <a href="https://openweathermap.org/api" target="_blank" rel="noreferrer">
+          OpenWeather API 정보 보기 <span aria-hidden="true">↗</span>
+        </a>
+      </aside>
 
-        <div class="service-box">
-          <span class="s-title">통합 대기질 & 미세먼지 분석</span>
-          <p class="s-desc">
-            미세먼지(PM10) 및 초미세먼지(PM2.5) 수치와 함께 마스크 착용 여부, 실내 환기 가이드 등 실생활 맞춤 수칙을 안내합니다.
-          </p>
-        </div>
-
-        <div class="service-box">
-          <span class="s-title">맞춤형 온도 단위 제공</span>
-          <p class="s-desc">
-            섭씨(°C)와 화씨(°F) 버전을 자유롭게 전환하여 원하는 단위로 날씨 정보를 확인하실 수 있습니다.
-          </p>
-        </div>
-      </div>
-
-      <div class="action-row">
-        <el-button type="primary" size="large" style="width: 100%" @click="handleGoHome">
-          날씨 대시보드로 돌아가기
-        </el-button>
-      </div>
-    </div>
+      <RouterLink class="home-link" to="/">현재 날씨 확인하기</RouterLink>
+    </section>
   </div>
 </template>
 
 <style scoped>
-.toss-about-container {
+.about-container {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.page-title-box {
-  margin-bottom: 4px;
-}
-
 .page-title {
-  margin: 0 0 4px 0;
-  font-size: 22px;
-  font-weight: 700;
+  margin: 0 0 4px;
   color: var(--toss-foreground);
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
 }
 
 .page-desc {
   margin: 0;
-  font-size: 14px;
   color: var(--toss-muted);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .about-card {
-  background: var(--toss-canvas);
   border: 1px solid var(--toss-border);
-  border-radius: 16px;
+  border-radius: 18px;
+  background: var(--toss-canvas);
   padding: 28px;
 }
 
 .intro-banner {
   border-bottom: 1px solid var(--toss-border);
-  padding-bottom: 20px;
-  margin-bottom: 24px;
+  padding-bottom: 22px;
 }
 
-.intro-headline {
-  margin: 0 0 8px 0;
-  font-size: 19px;
-  font-weight: 700;
-  color: var(--toss-blue);
+.eyebrow {
+  margin: 0 0 6px;
+  color: var(--toss-weak-fg);
+  font-size: 14px;
+  font-weight: 800;
 }
 
-.intro-text {
+.intro-banner h2,
+.section-heading,
+.data-note h2 {
   margin: 0;
-  font-size: 15px;
+  color: var(--toss-foreground);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.intro-banner > p:last-child {
+  max-width: 680px;
+  margin: 10px 0 0;
   color: var(--toss-body);
-  line-height: 1.6;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.7;
+}
+
+.section-heading {
+  margin-top: 26px;
+  font-size: 18px;
 }
 
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
-  margin-bottom: 28px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
 }
 
 .service-box {
-  background: var(--toss-surface);
-  padding: 18px;
+  border: 1px solid #e1e6eb;
   border-radius: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  background: #ffffff;
+  padding: 18px;
 }
 
-.s-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--toss-foreground);
-}
-
-.s-desc {
+.service-box h3 {
   margin: 0;
-  font-size: 13px;
-  color: var(--toss-body);
-  line-height: 1.5;
+  color: var(--toss-foreground);
+  font-size: 15px;
+  font-weight: 800;
 }
 
-.action-row {
-  margin-top: 12px;
+.service-box p {
+  margin: 8px 0 0;
+  color: var(--toss-body);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.data-note {
+  margin-top: 22px;
+  border: 1px solid #b9d4f4;
+  border-radius: 14px;
+  background: #f4f8ff;
+  padding: 18px;
+}
+
+.data-note h2 {
+  font-size: 16px;
+}
+
+.data-note p {
+  margin: 8px 0 10px;
+  color: var(--toss-body);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.data-note a {
+  color: var(--toss-blue);
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.home-link {
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 24px;
+  border-radius: 12px;
+  background: var(--toss-blue);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.home-link:hover {
+  background: var(--toss-blue-hover);
+  color: #ffffff;
+}
+
+@media (max-width: 640px) {
+  .about-card {
+    padding: 20px;
+  }
+
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

@@ -1,319 +1,337 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { stationOptions } from '@/constants/cities'
 import { useConfigStore } from '@/stores/configStore'
 import { useWeatherApi } from '@/composables/useWeatherApi'
+import CitySelector from '../components/common/CitySelector.vue'
 import StatusAlert from '../components/common/StatusAlert.vue'
 import SvgIcon from '../components/common/SvgIcon.vue'
 
 const route = useRoute()
 const router = useRouter()
 const configStore = useConfigStore()
-
 const cityData = ref(null)
 const { isLoading, errorMessage, fetchCityDetail, formatTemperature } = useWeatherApi()
 
+let loadRequestId = 0
+
 const currentCityId = computed(() => route.params?.cityId ?? 'city_01')
-
-// 대한민국 14개 주요 도시 관측소 바로가기 옵션
-const stationOptions = [
-  { label: '서울', value: 'city_01' },
-  { label: '수원', value: 'city_02' },
-  { label: '부산', value: 'city_03' },
-  { label: '인천', value: 'city_04' },
-  { label: '대구', value: 'city_05' },
-  { label: '대전', value: 'city_06' },
-  { label: '광주', value: 'city_07' },
-  { label: '울산', value: 'city_08' },
-  { label: '제주', value: 'city_09' },
-  { label: '춘천', value: 'city_10' },
-  { label: '강릉', value: 'city_11' },
-  { label: '전주', value: 'city_12' },
-  { label: '청주', value: 'city_13' },
-  { label: '창원', value: 'city_14' },
-]
-
-const loadDetailData = async () => {
-  cityData.value = await fetchCityDetail(currentCityId.value)
-}
-
-watch(
-  currentCityId,
-  () => {
-    loadDetailData()
+const selectedStationId = computed({
+  get: () => currentCityId.value,
+  set: (targetId) => {
+    if (targetId !== currentCityId.value) router.push(`/weather/${targetId}`)
   },
-  { immediate: true },
-)
-
-const handleSwitchStation = (targetId) => {
-  if (targetId !== currentCityId.value) {
-    router.push(`/weather/${targetId}`)
-  }
-}
+})
 
 const displayTemp = computed(() => formatTemperature(cityData.value?.temp))
 const displayFeelsLike = computed(() => formatTemperature(cityData.value?.feelsLike))
+
+const weatherIconName = computed(() => {
+  const status = cityData.value?.status ?? ''
+  if (status.includes('맑음') || status.includes('Clear') || status.includes('Sun')) return 'sun'
+  if (status.includes('비') || status.includes('Rain') || status.includes('소나기')) return 'rain'
+  return 'cloud'
+})
+
+const formattedObservedAt = computed(() => {
+  if (!Number.isFinite(cityData.value?.observedAt)) return '관측 시각 정보 없음'
+
+  return new Intl.DateTimeFormat('ko-KR', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'Asia/Seoul',
+  }).format(new Date(cityData.value.observedAt * 1000))
+})
+
+const formatMetric = (value, suffix = '') => {
+  if (!Number.isFinite(value)) return '—'
+  return `${value}${suffix}`
+}
+
+const loadDetailData = async () => {
+  const requestId = ++loadRequestId
+  const data = await fetchCityDetail(currentCityId.value)
+
+  if (requestId === loadRequestId) cityData.value = data
+}
+
+watch(currentCityId, loadDetailData, { immediate: true })
 </script>
 
 <template>
-  <div class="toss-detail-container">
-    <div class="page-title-box">
-      <h2 class="page-title">관측소 상세 정보</h2>
-      <p class="page-desc">해당 관측 지역의 실시간 상세 기상 분석 결과입니다.</p>
-    </div>
+  <div class="detail-container">
+    <header class="page-title-box">
+      <h1 class="page-title">도시별 상세 날씨</h1>
+      <p class="page-desc">원하는 도시를 선택하면 현재 관측값을 자세히 볼 수 있습니다.</p>
+    </header>
 
-    <!-- 14개 관측소 퀵 전환 바 -->
-    <div class="quick-station-bar">
-      <span class="bar-label">관측소 선택:</span>
-      <div class="station-chips">
-        <button
-          v-for="st in stationOptions"
-          :key="st.value"
-          class="st-chip"
-          :class="{ active: currentCityId === st.value }"
-          @click="handleSwitchStation(st.value)"
-        >
-          {{ st.label }}
-        </button>
+    <CitySelector v-model="selectedStationId" :options="stationOptions" label="확인할 지역" />
+
+    <section class="detail-results" :aria-busy="isLoading" aria-label="상세 날씨 결과">
+      <StatusAlert
+        :message="errorMessage"
+        type="error"
+        retryable
+        :is-retrying="isLoading"
+        @retry="loadDetailData"
+      />
+
+      <div v-if="isLoading" class="skeleton-box" aria-label="상세 날씨를 불러오는 중">
+        <el-skeleton :rows="5" animated />
       </div>
-    </div>
 
-    <div v-if="isLoading" class="skeleton-box">
-      <el-skeleton :rows="5" animated />
-    </div>
-
-    <template v-else>
-      <StatusAlert :message="errorMessage" type="warning" />
-
-      <div v-if="cityData" class="detail-body">
-        <!-- Toss Banner Card -->
-        <div class="banner-card">
+      <template v-else-if="cityData">
+        <section class="banner-card" aria-labelledby="detail-results-title">
           <div class="banner-info">
             <div class="banner-title-row">
-              <SvgIcon name="map-pin" size="22" color="#3182f6" />
-              <h3 class="city-name">{{ cityData.name }}</h3>
+              <SvgIcon name="map-pin" size="22" color="#1469d8" aria-hidden="true" />
+              <h2 id="detail-results-title">{{ cityData.name }}</h2>
             </div>
-            <span class="sub-info">OpenWeather ID: {{ cityData.englishName }} | 국가: {{ cityData.country }}</span>
+            <p class="sub-info">{{ cityData.fullName }} · {{ cityData.country }}</p>
+            <p class="observed-at">관측 시각 · {{ formattedObservedAt }}</p>
           </div>
 
-          <div class="banner-temp">
-            <span class="temp-val">{{ displayTemp }}</span>
-            <span class="temp-unit">{{ configStore.unitSymbol }}</span>
-          </div>
-        </div>
-
-        <!-- Detail Metrics Grid -->
-        <div class="metrics-grid">
-          <div class="metric-card">
-            <div class="m-title-row">
-              <SvgIcon name="thermometer" size="16" color="#3182f6" />
-              <span class="m-title">실시간 기온</span>
+          <div
+            class="banner-weather"
+            :aria-label="`현재 날씨 ${cityData.status}, 기온 ${displayTemp ?? '정보 없음'}${configStore.unitSymbol}`"
+          >
+            <SvgIcon :name="weatherIconName" size="38" color="#1469d8" aria-hidden="true" />
+            <div class="banner-temp">
+              <span class="temp-val">{{ displayTemp ?? '—' }}</span>
+              <span v-if="displayTemp !== null" class="temp-unit">{{
+                configStore.unitSymbol
+              }}</span>
             </div>
-            <span class="m-value">{{ displayTemp }}{{ configStore.unitSymbol }}</span>
           </div>
+        </section>
 
-          <div class="metric-card">
-            <div class="m-title-row">
-              <SvgIcon name="sun" size="16" color="#3182f6" />
-              <span class="m-title">체감 온도</span>
+        <section class="metrics-grid" aria-label="상세 관측값">
+          <article class="metric-card">
+            <div class="metric-title">
+              <SvgIcon name="thermometer" size="16" color="#1469d8" aria-hidden="true" />
+              <h3>현재 기온</h3>
             </div>
-            <span class="m-value">{{ displayFeelsLike }}{{ configStore.unitSymbol }}</span>
-          </div>
-
-          <div class="metric-card">
-            <div class="m-title-row">
-              <SvgIcon name="cloud" size="16" color="#3182f6" />
-              <span class="m-title">기상 현황</span>
+            <p>
+              {{ displayTemp ?? '—'
+              }}<span v-if="displayTemp !== null">{{ configStore.unitSymbol }}</span>
+            </p>
+          </article>
+          <article class="metric-card">
+            <div class="metric-title">
+              <SvgIcon name="sun" size="16" color="#1469d8" aria-hidden="true" />
+              <h3>체감 온도</h3>
             </div>
-            <span class="m-value">{{ cityData.status }}</span>
-          </div>
-
-          <div class="metric-card">
-            <div class="m-title-row">
-              <SvgIcon name="droplet" size="16" color="#3182f6" />
-              <span class="m-title">대기 습도</span>
+            <p>
+              {{ displayFeelsLike ?? '—'
+              }}<span v-if="displayFeelsLike !== null">{{ configStore.unitSymbol }}</span>
+            </p>
+          </article>
+          <article class="metric-card">
+            <div class="metric-title">
+              <SvgIcon name="cloud" size="16" color="#1469d8" aria-hidden="true" />
+              <h3>날씨 상태</h3>
             </div>
-            <span class="m-value">{{ cityData.humidity }}</span>
-          </div>
-
-          <div class="metric-card">
-            <div class="m-title-row">
-              <SvgIcon name="wind" size="16" color="#3182f6" />
-              <span class="m-title">풍속</span>
+            <p>{{ cityData.status }}</p>
+          </article>
+          <article class="metric-card">
+            <div class="metric-title">
+              <SvgIcon name="droplet" size="16" color="#1469d8" aria-hidden="true" />
+              <h3>습도</h3>
             </div>
-            <span class="m-value">{{ cityData.windSpeed }}</span>
-          </div>
-
-          <div class="metric-card">
-            <div class="m-title-row">
-              <SvgIcon name="gauge" size="16" color="#3182f6" />
-              <span class="m-title">기압</span>
+            <p>{{ formatMetric(cityData.humidity, '%') }}</p>
+          </article>
+          <article class="metric-card">
+            <div class="metric-title">
+              <SvgIcon name="wind" size="16" color="#1469d8" aria-hidden="true" />
+              <h3>풍속</h3>
             </div>
-            <span class="m-value">{{ cityData.pressure }}</span>
-          </div>
-        </div>
-      </div>
-    </template>
+            <p>{{ formatMetric(cityData.windSpeed, ' m/s') }}</p>
+          </article>
+          <article class="metric-card">
+            <div class="metric-title">
+              <SvgIcon name="gauge" size="16" color="#1469d8" aria-hidden="true" />
+              <h3>기압</h3>
+            </div>
+            <p>{{ formatMetric(cityData.pressure, ' hPa') }}</p>
+          </article>
+        </section>
+      </template>
+    </section>
 
     <div class="footer-action">
-      <el-button type="primary" size="large" @click="router.push('/')">
-        메인 대시보드로 돌아가기
-      </el-button>
+      <RouterLink class="back-link" to="/">
+        전체 도시 날씨로 돌아가기
+        <SvgIcon name="arrow-right" size="16" color="currentColor" aria-hidden="true" />
+      </RouterLink>
     </div>
   </div>
 </template>
 
 <style scoped>
-.toss-detail-container {
+.detail-container,
+.detail-results {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.page-title-box {
-  margin-bottom: 4px;
-}
-
 .page-title {
-  margin: 0 0 4px 0;
-  font-size: 22px;
-  font-weight: 700;
+  margin: 0 0 4px;
   color: var(--toss-foreground);
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
 }
 
-.page-desc {
+.page-desc,
+.sub-info,
+.observed-at {
   margin: 0;
-  font-size: 14px;
   color: var(--toss-muted);
-}
-
-.quick-station-bar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--toss-canvas);
-  border: 1px solid var(--toss-border);
-  border-radius: 14px;
-  padding: 10px 16px;
-  overflow-x: auto;
-}
-
-.bar-label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--toss-body);
-  white-space: nowrap;
-}
-
-.station-chips {
-  display: flex;
-  gap: 8px;
-}
-
-.st-chip {
-  background: var(--toss-surface);
-  color: var(--toss-body);
-  border: none;
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s ease;
-}
-
-.st-chip.active {
-  background: var(--toss-weak-bg);
-  color: var(--toss-weak-fg);
 }
 
 .banner-card {
-  background: var(--toss-canvas);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
   border: 1px solid var(--toss-border);
   border-radius: 16px;
+  background: var(--toss-canvas);
   padding: 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
 }
 
-.banner-title-row {
+.banner-title-row,
+.banner-weather,
+.banner-temp,
+.metric-title,
+.back-link {
   display: flex;
   align-items: center;
+}
+
+.banner-title-row,
+.metric-title,
+.back-link {
   gap: 8px;
-  margin-bottom: 4px;
 }
 
-.city-name {
+.banner-title-row h2 {
   margin: 0;
-  font-size: 24px;
-  font-weight: 700;
   color: var(--toss-foreground);
+  font-size: 26px;
+  font-weight: 800;
 }
 
 .sub-info {
-  font-size: 13px;
-  color: var(--toss-muted);
+  margin-top: 5px;
+}
+
+.observed-at {
+  margin-top: 3px;
+}
+
+.banner-weather {
+  flex: 0 0 auto;
+  gap: 14px;
 }
 
 .banner-temp {
-  display: flex;
   align-items: baseline;
 }
 
 .temp-val {
-  font-size: 42px;
-  font-weight: 700;
   color: var(--toss-blue);
+  font-size: 46px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
   line-height: 1;
 }
 
 .temp-unit {
-  font-size: 20px;
-  font-weight: 600;
+  margin-left: 3px;
   color: var(--toss-muted);
-  margin-left: 2px;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
 .metric-card {
-  background: var(--toss-canvas);
   border: 1px solid var(--toss-border);
   border-radius: 14px;
+  background: var(--toss-canvas);
   padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
-.m-title-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.m-title {
-  font-size: 13px;
+.metric-title h3 {
+  margin: 0;
   color: var(--toss-muted);
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 800;
 }
 
-.m-value {
-  font-size: 18px;
-  font-weight: 700;
+.metric-card p {
+  margin: 10px 0 0;
   color: var(--toss-foreground);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.metric-card p span {
+  margin-left: 2px;
+  color: var(--toss-muted);
+  font-size: 14px;
 }
 
 .footer-action {
-  margin-top: 12px;
   display: flex;
   justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.back-link {
+  min-height: 44px;
+  border: 1px solid #a3c9f5;
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--toss-blue);
+  font-size: 14px;
+  font-weight: 800;
+  padding: 0 14px;
+}
+
+@media (max-width: 640px) {
+  .banner-card {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .banner-weather {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .footer-action,
+  .back-link {
+    width: 100%;
+  }
+
+  .back-link {
+    justify-content: center;
+  }
 }
 </style>

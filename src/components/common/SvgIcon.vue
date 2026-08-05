@@ -38,7 +38,9 @@ const sizePx = computed(() => (typeof props.size === 'number' ? `${props.size}px
     <!-- Sun (맑음) -->
     <g v-if="name === 'sun'">
       <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+      <path
+        d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+      />
     </g>
 
     <!-- Cloud (구름) -->
@@ -59,7 +61,9 @@ const sizePx = computed(() => (typeof props.size === 'number' ? `${props.size}px
 
     <!-- Wind (풍속) -->
     <g v-else-if="name === 'wind'">
-      <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2" />
+      <path
+        d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"
+      />
     </g>
 
     <!-- Thermometer (온도) -->
@@ -92,12 +96,20 @@ const sizePx = computed(() => (typeof props.size === 'number' ? `${props.size}px
 
     <!-- Sparkles (하이라이트) -->
     <g v-else-if="name === 'sparkles'">
-      <path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z" />
+      <path
+        d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z"
+      />
     </g>
 
     <!-- Air (대기) -->
     <g v-else-if="name === 'air'">
       <path d="M6 12h12M4 8h16M8 16h8" />
+    </g>
+
+    <!-- Search (검색) -->
+    <g v-else-if="name === 'search'">
+      <circle cx="11" cy="11" r="6" />
+      <path d="m16 16 4 4" />
     </g>
   </svg>
 </template>

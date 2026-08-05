@@ -1,11 +1,11 @@
 /* Toss Design System (TDS) Theme & Tokens */
 :root {
-  --toss-blue: #3182f6;
-  --toss-blue-hover: #2272eb;
+  --toss-blue: #1469d8;
+  --toss-blue-hover: #0f58b8;
   --toss-canvas: #ffffff;
   --toss-foreground: #191f28;
-  --toss-body: #4e5968;
-  --toss-muted: #8b95a1;
+  --toss-body: #3d4653;
+  --toss-muted: #66717f;
   --toss-surface: #f2f4f6;
   --toss-border: #e5e8eb;
   --toss-weak-bg: #e8f3ff;
@@ -21,10 +21,23 @@
 body {
   background-color: var(--toss-surface);
   color: var(--toss-foreground);
-  font-family: "Toss Product Sans", -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family:
+    'Toss Product Sans',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Pretendard',
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Toss Style Card Container */

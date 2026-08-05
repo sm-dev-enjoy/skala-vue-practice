@@ -1,24 +1,43 @@
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
+const STORAGE_KEY = 'weather-insight:temperature-unit'
+const validUnits = new Set(['celsius', 'fahrenheit'])
+
+const getSavedUnit = () => {
+  try {
+    const savedUnit = window.localStorage.getItem(STORAGE_KEY)
+    return validUnits.has(savedUnit) ? savedUnit : 'celsius'
+  } catch {
+    return 'celsius'
+  }
+}
+
 export const useConfigStore = defineStore('config', () => {
-  // 1. state: 단위를 저장하는 변수 (초기값은 'celsius')
-  // 값은 오직 'celsius' 또는 'fahrenheit' 두 가지만 가집니다.
-  const unit = ref('celsius')
+  const unit = ref(getSavedUnit())
 
-  // 2. getters: 현재 단위 상태에 맞춰 화면에 뿌릴 기호(℃ / ℉)를 실시간 리턴
-  const unitSymbol = computed(() => {
-    return unit.value === 'celsius' ? '℃' : '℉'
-  })
+  const unitSymbol = computed(() => (unit.value === 'celsius' ? '°C' : '°F'))
 
-  // 3. actions: 버튼 클릭 시 'celsius'와 'fahrenheit'를 토글(스위칭)하는 함수
-  function toggleUnit() {
-    unit.value = unit.value === 'celsius' ? 'fahrenheit' : 'celsius'
+  const setUnit = (nextUnit) => {
+    if (!validUnits.has(nextUnit)) return
+
+    unit.value = nextUnit
+
+    try {
+      window.localStorage.setItem(STORAGE_KEY, nextUnit)
+    } catch {
+      // 저장소 접근이 제한된 환경에서는 현재 세션에서만 단위를 유지합니다.
+    }
+  }
+
+  const toggleUnit = () => {
+    setUnit(unit.value === 'celsius' ? 'fahrenheit' : 'celsius')
   }
 
   return {
     unit,
     unitSymbol,
+    setUnit,
     toggleUnit,
   }
 })

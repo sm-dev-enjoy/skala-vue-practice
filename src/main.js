@@ -5,13 +5,19 @@ import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import router from './router'
-import ElementPlus from 'element-plus'
-import 'element-plus/dist/index.css'
+import { ElAlert, ElEmpty, ElInput, ElSkeleton } from 'element-plus'
+import 'element-plus/es/components/alert/style/css'
+import 'element-plus/es/components/empty/style/css'
+import 'element-plus/es/components/input/style/css'
+import 'element-plus/es/components/skeleton/style/css'
 
 const app = createApp(App)
 
 app.use(createPinia())
 app.use(router)
-app.use(ElementPlus)
+app.component('ElAlert', ElAlert)
+app.component('ElEmpty', ElEmpty)
+app.component('ElInput', ElInput)
+app.component('ElSkeleton', ElSkeleton)
 
 app.mount('#app')

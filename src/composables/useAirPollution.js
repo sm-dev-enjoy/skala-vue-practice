@@ -1,74 +1,108 @@
 import { ref } from 'vue'
 import axios from 'axios'
+import { cityByKey } from '@/constants/cities'
 
 const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY
 const AIR_API_URL = 'https://api.openweathermap.org/data/2.5/air_pollution'
+const REQUEST_TIMEOUT = 10000
+
+const asNumberOrNull = (value) => (typeof value === 'number' ? value : null)
+
+const getErrorMessage = (error) => {
+  if (!API_KEY) {
+    return '대기질 데이터 연결 설정을 확인 중입니다. 잠시 후 다시 시도해 주세요.'
+  }
+
+  if (error?.code === 'ECONNABORTED') {
+    return '대기질 응답이 지연되고 있습니다. 잠시 후 다시 시도해 주세요.'
+  }
+
+  if (error?.response?.status === 429) {
+    return '요청이 많아 대기질 정보를 잠시 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.'
+  }
+
+  return '대기질 측정 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'
+}
 
 export function useAirPollution() {
   const isLoading = ref(false)
   const errorMessage = ref('')
   const airData = ref(null)
 
-  // 대한민국 14개 주요 도시 위경도 정보
-  const cityCoords = {
-    seoul: { name: '서울특별시', lat: 37.5665, lon: 126.9780 },
-    busan: { name: '부산광역시', lat: 35.1796, lon: 129.0756 },
-    incheon: { name: '인천광역시', lat: 37.4563, lon: 126.7052 },
-    daegu: { name: '대구광역시', lat: 35.8714, lon: 128.6014 },
-    daejeon: { name: '대전광역시', lat: 36.3510, lon: 127.3850 },
-    gwangju: { name: '광주광역시', lat: 35.1595, lon: 126.8526 },
-    ulsan: { name: '울산광역시', lat: 35.5384, lon: 129.3114 },
-    suwon: { name: '수원시', lat: 37.2636, lon: 127.0286 },
-    jeju: { name: '제주특별자치도', lat: 33.4996, lon: 126.5312 },
-    chuncheon: { name: '춘천시', lat: 37.8813, lon: 127.7298 },
-    gangneung: { name: '강릉시', lat: 37.7519, lon: 128.8761 },
-    jeonju: { name: '전주시', lat: 35.8242, lon: 127.1480 },
-    cheongju: { name: '청주시', lat: 36.6424, lon: 127.4890 },
-    changwon: { name: '창원시', lat: 35.2280, lon: 128.6811 },
-  }
+  let requestId = 0
 
   const getAqiStatus = (aqi) => {
     const statusMap = {
-      1: { label: '매우 좋음', type: 'success', color: '#10b981', percent: 20 },
-      2: { label: '좋음', type: 'primary', color: '#3b82f6', percent: 40 },
-      3: { label: '보통', type: 'warning', color: '#f59e0b', percent: 60 },
-      4: { label: '나쁨', type: 'warning', color: '#f97316', percent: 80 },
-      5: { label: '매우 나쁨', type: 'danger', color: '#ef4444', percent: 100 },
+      1: { label: '매우 좋음', color: '#147a53' },
+      2: { label: '좋음', color: '#1469d8' },
+      3: { label: '보통', color: '#9a6700' },
+      4: { label: '나쁨', color: '#c24a09' },
+      5: { label: '매우 나쁨', color: '#bf2636' },
     }
-    return statusMap[aqi] ?? { label: '측정 불가', type: 'info', color: '#94a3b8', percent: 0 }
+    return statusMap[aqi] ?? { label: '측정 불가', color: '#66717f' }
   }
 
   const fetchAirPollution = async (cityKey) => {
+    const city = cityByKey[cityKey]
+    const currentRequestId = ++requestId
     isLoading.value = true
     errorMessage.value = ''
+    airData.value = null
+
+    if (!city) {
+      errorMessage.value = '선택한 도시를 찾을 수 없습니다.'
+      isLoading.value = false
+      return null
+    }
 
     try {
-      const currentCity = cityCoords[cityKey] ?? cityCoords.seoul
-      const { lat, lon, name } = currentCity
+      if (!API_KEY) {
+        throw new Error('Missing OpenWeather API key')
+      }
 
-      const response = await axios.get(
-        `${AIR_API_URL}?lat=${lat}&lon=${lon}&appid=${API_KEY}`,
-      )
+      const response = await axios.get(AIR_API_URL, {
+        params: {
+          lat: city.lat,
+          lon: city.lon,
+          appid: API_KEY,
+        },
+        timeout: REQUEST_TIMEOUT,
+      })
+
+      if (currentRequestId !== requestId) return null
 
       const { list } = response?.data ?? {}
       const [firstItem] = list ?? []
-      const { main, components } = firstItem ?? {}
+      const { main, components, dt } = firstItem ?? {}
+      const aqi = asNumberOrNull(main?.aqi)
 
-      airData.value = {
-        cityName: name,
-        aqi: main?.aqi ?? 1,
-        co: components?.co ?? 0,
-        no2: components?.no2 ?? 0,
-        o3: components?.o3 ?? 0,
-        pm2_5: components?.pm2_5 ?? 0,
-        pm10: components?.pm10 ?? 0,
+      if (!aqi) {
+        errorMessage.value = '대기질 측정 결과가 충분하지 않습니다. 잠시 후 다시 시도해 주세요.'
+        return null
       }
+
+      const data = {
+        cityName: city.fullName,
+        aqi,
+        co: asNumberOrNull(components?.co),
+        no2: asNumberOrNull(components?.no2),
+        o3: asNumberOrNull(components?.o3),
+        pm2_5: asNumberOrNull(components?.pm2_5),
+        pm10: asNumberOrNull(components?.pm10),
+        observedAt: asNumberOrNull(dt),
+      }
+
+      airData.value = data
+      return data
     } catch (error) {
-      console.error('대기질 API 조회 실패:', error)
-      errorMessage.value = '대기질 측정 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'
-      airData.value = null
+      if (currentRequestId === requestId) {
+        errorMessage.value = getErrorMessage(error)
+      }
+      return null
     } finally {
-      isLoading.value = false
+      if (currentRequestId === requestId) {
+        isLoading.value = false
+      }
     }
   }
 
