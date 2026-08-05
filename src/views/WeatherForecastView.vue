@@ -1,14 +1,16 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import axios from 'axios'
 import { useConfigStore } from '@/stores/configStore'
+import { useForecast } from '@/composables/useForecast'
+import { useWeatherApi } from '@/composables/useWeatherApi'
+import CitySelector from '../components/common/CitySelector.vue'
+import StatusAlert from '../components/common/StatusAlert.vue'
 
 const configStore = useConfigStore()
-
 const selectedCity = ref('Seoul')
-const isLoading = ref(false)
-const errorMessage = ref('')
-const forecastList = ref([])
+
+const { isLoading, errorMessage, forecastList, fetchForecast } = useForecast()
+const { formatTemperature } = useWeatherApi()
 
 const cityOptions = [
   { label: '서울 (Seoul)', value: 'Seoul' },
@@ -16,62 +18,13 @@ const cityOptions = [
   { label: '부산 (Busan)', value: 'Busan' },
 ]
 
-const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY
-const FORECAST_URL = 'https://api.openweathermap.org/data/2.5/forecast'
-
-/**
- * 선택한 도시의 5일 / 3시간 단위 일기 예보 데이터를 비동기로 불러옵니다.
- */
-const fetchForecast = async () => {
-  isLoading.value = true
-  errorMessage.value = ''
-
-  try {
-    const response = await axios.get(
-      `${FORECAST_URL}?q=${selectedCity.value}&appid=${API_KEY}&units=metric&lang=kr`,
-    )
-
-    // ES6+ 구조분해 및 옵셔널 체이닝으로 3시간 단위 목록 정제
-    const { list } = response?.data ?? {}
-    
-    forecastList.value = (list ?? []).slice(0, 12).map((item) => {
-      const { dt_txt, main, weather, wind } = item ?? {}
-      const [firstWeather] = weather ?? []
-      
-      return {
-        time: dt_txt ?? '',
-        temp: main?.temp ?? 0,
-        feelsLike: main?.feels_like ?? 0,
-        humidity: main?.humidity ?? 0,
-        description: firstWeather?.description ?? '정보 없음',
-        icon: firstWeather?.icon ?? '01d',
-        windSpeed: wind?.speed ?? 0,
-      }
-    })
-  } catch (error) {
-    console.error('5일 일기예보 API 호출 중 오류 발생:', error)
-    errorMessage.value = '일기예보 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'
-    forecastList.value = []
-  } finally {
-    isLoading.value = false
-  }
-}
-
 onMounted(() => {
-  fetchForecast()
+  fetchForecast(selectedCity.value)
 })
 
-watch(selectedCity, () => {
-  fetchForecast()
+watch(selectedCity, (newCity) => {
+  fetchForecast(newCity)
 })
-
-// 온습도 단위 변환 헬퍼
-const formatTemp = (celsiusTemp) => {
-  if (configStore.unit === 'fahrenheit') {
-    return `${Math.round((celsiusTemp * 9) / 5 + 32)}${configStore.unitSymbol}`
-  }
-  return `${Math.round(celsiusTemp * 10) / 10}${configStore.unitSymbol}`
-}
 </script>
 
 <template>
@@ -86,19 +39,12 @@ const formatTemp = (celsiusTemp) => {
       </div>
     </template>
 
-    <!-- 도시 선택 조율바 -->
-    <div class="city-selector-bar">
-      <span class="selector-label">도시 선택:</span>
-      <el-radio-group v-model="selectedCity" size="default">
-        <el-radio-button
-          v-for="city in cityOptions"
-          :key="city.value"
-          :value="city.value"
-        >
-          {{ city.label }}
-        </el-radio-button>
-      </el-radio-group>
-    </div>
+    <!-- 공통 도시 선택 컴포넌트 -->
+    <CitySelector
+      v-model="selectedCity"
+      :options="cityOptions"
+      label="예보 관측 도시"
+    />
 
     <!-- 로딩 스켈레톤 -->
     <div v-if="isLoading" class="skeleton-wrapper">
@@ -106,16 +52,9 @@ const formatTemp = (celsiusTemp) => {
     </div>
 
     <template v-else>
-      <el-alert
-        v-if="errorMessage"
-        :title="errorMessage"
-        type="error"
-        show-icon
-        :closable="false"
-        style="margin-bottom: 20px"
-      />
+      <StatusAlert :message="errorMessage" type="error" />
 
-      <!-- 예보 타임라인 카드 리스트 -->
+      <!-- 예보 카드리스트 -->
       <div v-if="forecastList.length > 0" class="forecast-grid">
         <el-row :gutter="16">
           <el-col
@@ -138,7 +77,9 @@ const formatTemp = (celsiusTemp) => {
                   class="weather-icon"
                 />
                 <div class="temp-group">
-                  <span class="main-temp">{{ formatTemp(item.temp) }}</span>
+                  <span class="main-temp">
+                    {{ formatTemperature(item.temp) }}{{ configStore.unitSymbol }}
+                  </span>
                   <span class="desc-text">{{ item.description }}</span>
                 </div>
               </div>
@@ -177,22 +118,6 @@ const formatTemp = (celsiusTemp) => {
   margin: 0;
   font-size: 0.85rem;
   color: #64748b;
-}
-
-.city-selector-bar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-  background: #f8fafc;
-  padding: 12px 16px;
-  border-radius: 8px;
-}
-
-.selector-label {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #334155;
 }
 
 .skeleton-wrapper {

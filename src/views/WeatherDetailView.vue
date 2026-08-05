@@ -2,98 +2,32 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useConfigStore } from '@/stores/configStore'
-import axios from 'axios'
+import { useWeatherApi } from '@/composables/useWeatherApi'
+import StatusAlert from '../components/common/StatusAlert.vue'
 
 const route = useRoute()
 const router = useRouter()
 const configStore = useConfigStore()
 
-const isLoading = ref(false)
-const errorMessage = ref('')
 const cityData = ref(null)
+const { isLoading, errorMessage, fetchCityDetail, formatTemperature } = useWeatherApi()
 
-// 도시 매핑 사전 (전개 연산자로 불변 데이터 참조)
-const cityMapping = {
-  city_01: { english: 'Seoul', korean: '대한민국 서울특별시', coords: '37.5665, 126.9780' },
-  city_02: { english: 'Suwon', korean: '경기도 수원시 영통구', coords: '37.2636, 127.0286' },
-  city_03: { english: 'Busan', korean: '부산광역시 해운대구', coords: '35.1796, 129.0756' },
-}
-
-const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY
-
-/**
- * 라우터 파라미터(cityId)를 기반으로 해당 도시의 상세 기상 관측 정보를 가져옵니다.
- */
-const fetchDetailWeather = async () => {
-  const { cityId } = route?.params ?? {}
-  const targetCity = cityMapping[cityId]
-
-  if (!targetCity) {
-    cityData.value = null
-    errorMessage.value = '해당 지역의 상세 기상 데이터 장부가 존재하지 않습니다.'
-    return
-  }
-
-  isLoading.value = true
-  errorMessage.value = ''
-
-  try {
-    const { english, korean, coords } = targetCity
-    const response = await axios.get(
-      `https://api.openweathermap.org/data/2.5/weather?q=${english}&appid=${API_KEY}&units=metric&lang=kr`,
-    )
-
-    // ES6+ 구조분해 할당 (Destructuring) 및 Nullish Coalescing 적용
-    const { main, weather, wind, sys } = response?.data ?? {}
-    const [weatherInfo] = weather ?? []
-
-    cityData.value = {
-      name: korean,
-      englishName: english,
-      coords,
-      temp: main?.temp ?? 0,
-      feelsLike: main?.feels_like ?? 0,
-      tempMin: main?.temp_min ?? 0,
-      tempMax: main?.temp_max ?? 0,
-      status: weatherInfo?.description ?? '정보 없음',
-      humidity: `${main?.humidity ?? 0}%`,
-      windSpeed: `${wind?.speed ?? 0} m/s`,
-      pressure: `${main?.pressure ?? 0} hPa`,
-      country: sys?.country ?? 'KR',
-    }
-  } catch (error) {
-    console.error('상세 정보 통신 에러:', error)
-    cityData.value = null
-    errorMessage.value = '상세 날씨 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'
-  } finally {
-    isLoading.value = false
-  }
+const loadDetailData = async () => {
+  const cityId = route.params?.cityId
+  cityData.value = await fetchCityDetail(cityId)
 }
 
 watch(
   () => route.params?.cityId,
   () => {
-    fetchDetailWeather()
+    loadDetailData()
   },
   { immediate: true },
 )
 
-// 화씨 / 섭씨 온도 변환 연산
-const displayTemp = computed(() => {
-  const rawTemp = cityData.value?.temp ?? 0
-  if (configStore.unit === 'fahrenheit') {
-    return Math.round((rawTemp * 9) / 5 + 32)
-  }
-  return Math.round(rawTemp * 10) / 10
-})
-
-const displayFeelsLike = computed(() => {
-  const rawFeels = cityData.value?.feelsLike ?? 0
-  if (configStore.unit === 'fahrenheit') {
-    return Math.round((rawFeels * 9) / 5 + 32)
-  }
-  return Math.round(rawFeels * 10) / 10
-})
+// 온도 연산 유틸 바인딩
+const displayTemp = computed(() => formatTemperature(cityData.value?.temp))
+const displayFeelsLike = computed(() => formatTemperature(cityData.value?.feelsLike))
 </script>
 
 <template>
@@ -110,14 +44,7 @@ const displayFeelsLike = computed(() => {
     </div>
 
     <template v-else>
-      <el-alert
-        v-if="errorMessage"
-        :title="errorMessage"
-        type="warning"
-        show-icon
-        :closable="false"
-        style="margin-bottom: 20px"
-      />
+      <StatusAlert :message="errorMessage" type="warning" />
 
       <div v-if="cityData" class="detail-content">
         <el-descriptions

@@ -1,77 +1,24 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import axios from 'axios'
+import { useAirPollution } from '@/composables/useAirPollution'
+import CitySelector from '../components/common/CitySelector.vue'
+import StatusAlert from '../components/common/StatusAlert.vue'
 
 const selectedCityKey = ref('seoul')
-const isLoading = ref(false)
-const errorMessage = ref('')
-const airData = ref(null)
+const { isLoading, errorMessage, airData, getAqiStatus, fetchAirPollution } = useAirPollution()
 
-const cityCoords = {
-  seoul: { name: '서울특별시', lat: 37.5665, lon: 126.9780 },
-  suwon: { name: '수원시', lat: 37.2636, lon: 127.0286 },
-  busan: { name: '부산광역시', lat: 35.1796, lon: 129.0756 },
-}
-
-const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY
-const AIR_API_URL = 'https://api.openweathermap.org/data/2.5/air_pollution'
-
-// AQI 등급 상태 매핑 헬퍼
-const getAqiStatus = (aqi) => {
-  const statusMap = {
-    1: { label: '매우 좋음 🟢', type: 'success', color: '#10b981', percent: 20 },
-    2: { label: '좋음 🔵', type: 'primary', color: '#3b82f6', percent: 40 },
-    3: { label: '보통 🟡', type: 'warning', color: '#f59e0b', percent: 60 },
-    4: { label: '나쁨 🟠', type: 'warning', color: '#f97316', percent: 80 },
-    5: { label: '매우 나쁨 🔴', type: 'danger', color: '#ef4444', percent: 100 },
-  }
-  return statusMap[aqi] ?? { label: '측정 불가', type: 'info', color: '#94a3b8', percent: 0 }
-}
-
-/**
- * 지정 도시의 위/경도 기반으로 대기질(Air Pollution) 데이터를 조회합니다.
- */
-const fetchAirPollution = async () => {
-  isLoading.value = true
-  errorMessage.value = ''
-
-  try {
-    const currentCity = cityCoords[selectedCityKey.value] ?? cityCoords.seoul
-    const { lat, lon, name } = currentCity
-
-    const response = await axios.get(
-      `${AIR_API_URL}?lat=${lat}&lon=${lon}&appid=${API_KEY}`,
-    )
-
-    // ES6+ 구조분해 및 옵셔널 체이닝 파싱
-    const { list } = response?.data ?? {}
-    const [firstItem] = list ?? []
-    const { main, components } = firstItem ?? {}
-
-    airData.value = {
-      cityName: name,
-      aqi: main?.aqi ?? 1,
-      co: components?.co ?? 0,
-      no2: components?.no2 ?? 0,
-      o3: components?.o3 ?? 0,
-      pm2_5: components?.pm2_5 ?? 0,
-      pm10: components?.pm10 ?? 0,
-    }
-  } catch (error) {
-    console.error('대기질 API 조회 실패:', error)
-    errorMessage.value = '대기질 측정 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'
-    airData.value = null
-  } finally {
-    isLoading.value = false
-  }
-}
+const cityOptions = [
+  { label: '서울', value: 'seoul' },
+  { label: '수원', value: 'suwon' },
+  { label: '부산', value: 'busan' },
+]
 
 onMounted(() => {
-  fetchAirPollution()
+  fetchAirPollution(selectedCityKey.value)
 })
 
-watch(selectedCityKey, () => {
-  fetchAirPollution()
+watch(selectedCityKey, (newKey) => {
+  fetchAirPollution(newKey)
 })
 </script>
 
@@ -87,15 +34,12 @@ watch(selectedCityKey, () => {
       </div>
     </template>
 
-    <!-- 도시 선택 라디오 바 -->
-    <div class="city-selector-bar">
-      <span class="selector-label">관측 지역:</span>
-      <el-radio-group v-model="selectedCityKey" size="default">
-        <el-radio-button value="seoul">서울</el-radio-button>
-        <el-radio-button value="suwon">수원</el-radio-button>
-        <el-radio-button value="busan">부산</el-radio-button>
-      </el-radio-group>
-    </div>
+    <!-- 공통 도시 선택 컴포넌트 -->
+    <CitySelector
+      v-model="selectedCityKey"
+      :options="cityOptions"
+      label="대기질 관측 지역"
+    />
 
     <!-- 로딩 스켈레톤 -->
     <div v-if="isLoading" class="skeleton-wrapper">
@@ -103,14 +47,7 @@ watch(selectedCityKey, () => {
     </div>
 
     <template v-else>
-      <el-alert
-        v-if="errorMessage"
-        :title="errorMessage"
-        type="error"
-        show-icon
-        :closable="false"
-        style="margin-bottom: 20px"
-      />
+      <StatusAlert :message="errorMessage" type="error" />
 
       <div v-if="airData" class="air-content-body">
         <!-- AQI 수치 프로그레스 카드 -->
@@ -188,22 +125,6 @@ watch(selectedCityKey, () => {
   margin: 0;
   font-size: 0.85rem;
   color: #64748b;
-}
-
-.city-selector-bar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  background: #f8fafc;
-  padding: 12px 16px;
-  border-radius: 8px;
-}
-
-.selector-label {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #334155;
 }
 
 .skeleton-wrapper {
