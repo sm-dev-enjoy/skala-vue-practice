@@ -15,11 +15,11 @@
 
 ## 화면
 
-| **현재 날씨**                                   | **5일 예보**                                       |
-| ----------------------------------------------- | -------------------------------------------------- |
+| **현재 날씨** | **5일 예보** |
+| :---: | :---: |
 | ![현재 날씨 화면](docs/images/preview_home.png) | ![5일 예보 화면](docs/images/preview_forecast.png) |
-| **대기질**                                      | **서비스 소개**                                    |
-| ![대기질 화면](docs/images/preview_air.png)     | ![서비스 소개 화면](docs/images/preview_about.png) |
+| **대기질** | **서비스 소개** |
+| ![대기질 화면](docs/images/preview_air.png) | ![서비스 소개 화면](docs/images/preview_about.png) |
 
 ## 시작하기
 
@@ -54,13 +54,13 @@ npm run dev
 
 ## 사용할 수 있는 명령어
 
-| 명령어            | 설명                                                                                          |
-| ----------------- | --------------------------------------------------------------------------------------------- |
-| `npm run dev`     | Vite 개발 서버를 실행합니다.                                                                  |
-| `npm run build`   | 배포용 정적 파일을 `dist`에 생성합니다.                                                       |
-| `npm run preview` | 빌드된 결과를 로컬에서 미리 봅니다. `npm run build` 후 사용하세요.                            |
-| `npm run lint`    | Oxlint와 ESLint를 실행하고 가능한 항목은 자동으로 수정합니다. 실행 뒤 변경 사항을 확인하세요. |
-| `npm run format`  | `src` 디렉터리의 파일을 Prettier로 정리합니다. 이 명령은 파일을 직접 수정합니다.              |
+| 명령어 | 설명 |
+| :--- | :--- |
+| `npm run dev` | Vite 개발 서버를 실행합니다. |
+| `npm run build` | 배포용 정적 파일을 `dist`에 생성합니다. |
+| `npm run preview` | 빌드된 결과를 로컬에서 미리 봅니다. `npm run build` 후 사용하세요. |
+| `npm run lint` | Oxlint와 ESLint를 실행하고 가능한 항목은 자동으로 수정합니다. 실행 뒤 변경 사항을 확인하세요. |
+| `npm run format` | `src` 디렉터리의 파일을 Prettier로 정리합니다. 이 명령은 파일을 직접 수정합니다. |
 
 ## 데이터 범위와 참고 사항
 
