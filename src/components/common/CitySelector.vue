@@ -52,28 +52,41 @@ const handleSelect = (val) => {
   padding: 12px 16px;
   border-radius: 14px;
   border: 1px solid var(--toss-border);
+  overflow: hidden;
 }
 
 .selector-label {
   font-size: 14px;
   font-weight: 600;
   color: var(--toss-body);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .chips-group {
   display: flex;
   gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  padding-bottom: 2px;
+}
+
+.chips-group::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
 }
 
 .toss-chip {
   background: var(--toss-surface);
   color: var(--toss-body);
   border: none;
-  padding: 8px 16px;
+  padding: 7px 14px;
   border-radius: 10px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.15s ease;
 }
 
@@ -84,5 +97,19 @@ const handleSelect = (val) => {
 .toss-chip.active {
   background: var(--toss-weak-bg);
   color: var(--toss-weak-fg);
+}
+
+/* 모바일 분기 반응형 처리 */
+@media (max-width: 640px) {
+  .toss-city-selector {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px 14px;
+  }
+
+  .chips-group {
+    width: 100%;
+  }
 }
 </style>

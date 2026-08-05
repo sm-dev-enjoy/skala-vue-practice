@@ -15,7 +15,7 @@ const { formatTemperature } = useWeatherApi()
 
 const selectedDateFilter = ref('all')
 
-// 대한민국 14개 주요 도시 셀렉터 옵션 (제주: Jeju)
+// 대한민국 14개 주요 도시 셀렉터 옵션
 const cityOptions = [
   { label: '서울', value: 'Seoul' },
   { label: '부산', value: 'Busan' },
@@ -118,7 +118,7 @@ watch(selectedCity, (newCity) => {
       <p class="page-desc">OpenWeather API 기반 전국 14개 도시의 5일간 단기 기상 예측 데이터입니다.</p>
     </div>
 
-    <!-- 관측 지역 선택 (14개 도시) -->
+    <!-- 관측 지역 선택 (14개 도시 모바일 반응형 완벽 보강) -->
     <CitySelector
       v-model="selectedCity"
       :options="cityOptions"
@@ -239,32 +239,40 @@ watch(selectedCity, (newCity) => {
   background: var(--toss-canvas);
   border: 1px solid var(--toss-border);
   border-radius: 14px;
-  padding: 10px 16px;
-  overflow-x: auto;
+  padding: 12px 16px;
 }
 
 .filter-label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--toss-body);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .date-chips {
   display: flex;
   gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.date-chips::-webkit-scrollbar {
+  display: none;
 }
 
 .date-chip {
   background: var(--toss-surface);
   color: var(--toss-body);
   border: none;
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-size: 13px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.15s ease;
 }
 
@@ -351,5 +359,30 @@ watch(selectedCity, (newCity) => {
   font-weight: 700;
   color: var(--toss-blue);
   letter-spacing: -0.5px;
+}
+
+@media (max-width: 640px) {
+  .date-filter-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px 14px;
+  }
+
+  .date-chips {
+    width: 100%;
+  }
+
+  .toss-forecast-card {
+    padding: 16px;
+  }
+
+  .item-right {
+    gap: 12px;
+  }
+
+  .temp-text {
+    font-size: 22px;
+  }
 }
 </style>
