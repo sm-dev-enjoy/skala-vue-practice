@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { useConfigStore } from '@/stores/configStore'
 

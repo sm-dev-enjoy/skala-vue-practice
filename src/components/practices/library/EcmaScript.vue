@@ -60,7 +60,8 @@ const runTask3 = async () => {
 
     // 4. 결과 출력
     result3.value = `동기화 성공: ${nick}님 환영합니다.`
-  } catch (error) {
+  } catch (err) {
+    console.error('Task3 error:', err)
     result3.value = '통신 실패'
   }
 }
