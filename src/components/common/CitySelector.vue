@@ -14,7 +14,7 @@ defineProps({
   },
   label: {
     type: String,
-    default: '관측 지역 선택',
+    default: '관측 지역',
   },
 })
 
@@ -26,39 +26,63 @@ const handleSelect = (val) => {
 </script>
 
 <template>
-  <div class="city-selector-bar">
-    <span class="selector-label">{{ label }}:</span>
-    <el-radio-group
-      :model-value="modelValue"
-      size="default"
-      @change="handleSelect"
-    >
-      <el-radio-button
+  <div class="toss-city-selector">
+    <span class="selector-label">{{ label }}</span>
+    <div class="chips-group">
+      <button
         v-for="item in options"
         :key="item.value"
-        :value="item.value"
+        class="toss-chip"
+        :class="{ active: modelValue === item.value }"
+        @click="handleSelect(item.value)"
       >
         {{ item.label }}
-      </el-radio-button>
-    </el-radio-group>
+      </button>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.city-selector-bar {
+.toss-city-selector {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 20px;
-  background: #f8fafc;
+  background: var(--toss-canvas);
   padding: 12px 16px;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  border: 1px solid var(--toss-border);
 }
 
 .selector-label {
+  font-size: 14px;
   font-weight: 600;
-  font-size: 0.9rem;
-  color: #334155;
+  color: var(--toss-body);
+}
+
+.chips-group {
+  display: flex;
+  gap: 8px;
+}
+
+.toss-chip {
+  background: var(--toss-surface);
+  color: var(--toss-body);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.toss-chip:hover {
+  background: #e2e8f0;
+}
+
+.toss-chip.active {
+  background: var(--toss-weak-bg);
+  color: var(--toss-weak-fg);
 }
 </style>

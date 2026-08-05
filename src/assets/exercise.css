@@ -1,48 +1,81 @@
-/* Modern Weather App Design System */
+/* Toss Design System (TDS) Theme & Tokens */
 :root {
-  --primary-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-  --sky-gradient: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
-  --sunset-gradient: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
-  --mint-gradient: linear-gradient(135deg, #059669 0%, #34d399 100%);
-  --card-glass: rgba(255, 255, 255, 0.85);
-  --card-glass-dark: rgba(15, 23, 42, 0.75);
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
-  --shadow-hover: 0 20px 30px -10px rgba(0, 0, 0, 0.12), 0 10px 15px -5px rgba(0, 0, 0, 0.04);
+  --toss-blue: #3182f6;
+  --toss-blue-hover: #2272eb;
+  --toss-canvas: #ffffff;
+  --toss-foreground: #191f28;
+  --toss-body: #4e5968;
+  --toss-muted: #8b95a1;
+  --toss-surface: #f2f4f6;
+  --toss-border: #e5e8eb;
+  --toss-weak-bg: #e8f3ff;
+  --toss-weak-fg: #1b64da;
+  --toss-danger: #e42939;
+
+  --toss-radius-sm: 8px;
+  --toss-radius-md: 12px;
+  --toss-radius-lg: 16px;
+  --toss-radius-xl: 20px;
 }
 
 body {
-  background-color: #f1f5f9;
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.12) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(129, 140, 248, 0.12) 0px, transparent 50%);
-  background-attachment: fixed;
-  color: var(--text-main);
-  min-height: 100vh;
+  background-color: var(--toss-surface);
+  color: var(--toss-foreground);
+  font-family: "Toss Product Sans", -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Glassmorphism Card Utility */
-.glass-panel {
-  background: var(--card-glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 16px;
-  box-shadow: var(--shadow-soft);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Toss Style Card Container */
+.toss-card {
+  background: var(--toss-canvas);
+  border: 1px solid var(--toss-border);
+  border-radius: var(--toss-radius-lg);
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
 }
 
-.glass-panel:hover {
-  box-shadow: var(--shadow-hover);
-  transform: translateY(-2px);
+.toss-card:hover {
+  border-color: #d1d5db;
 }
 
-/* Global Transitions */
+/* Toss Badge Component */
+.toss-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--toss-radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--toss-weak-bg);
+  color: var(--toss-weak-fg);
+}
+
+.toss-badge.danger {
+  background: #fee2e2;
+  color: var(--toss-danger);
+}
+
+/* Element Plus Custom Overrides for TDS Style */
+.el-button--primary {
+  background-color: var(--toss-blue) !important;
+  border-color: var(--toss-blue) !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+}
+
+.el-button--primary:hover {
+  background-color: var(--toss-blue-hover) !important;
+  border-color: var(--toss-blue-hover) !important;
+}
+
+.el-card {
+  border-radius: 16px !important;
+  border-color: var(--toss-border) !important;
+}
+
 * {
   box-sizing: border-box;
-}
-
-button, input, select {
-  font-family: inherit;
 }

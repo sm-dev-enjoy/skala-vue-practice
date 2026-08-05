@@ -17,7 +17,6 @@ const { weatherList, searchQuery, selectedCityInfo, filteredWeatherList, updateQ
 
 const { isLoading, errorMessage, fetchRealTimeWeatherList, formatTemperature } = useWeatherApi()
 
-// 메인 Hero 배너에 띄울 선택 도시
 const selectedHeroIndex = ref(0)
 
 const heroCity = computed(() => {
@@ -27,7 +26,6 @@ const heroCity = computed(() => {
 
 const heroTemp = computed(() => formatTemperature(heroCity.value?.temp))
 
-// 퀵 도시 칩 목록
 const quickCities = [
   { name: '서울', key: 'Seoul', index: 0 },
   { name: '수원', key: 'Suwon', index: 1 },
@@ -64,7 +62,7 @@ watch(searchQuery, (nextQuery) => {
 
 const handleSelectHeroCity = (index, name) => {
   selectedHeroIndex.value = index
-  selectCity(`${name} 관측소가 선택되어 메인 하이라이트에 렌더링되었습니다.`)
+  selectCity(`${name} 관측소 선택됨`)
 }
 
 const handleDetailJump = (cityId) => {
@@ -73,88 +71,67 @@ const handleDetailJump = (cityId) => {
 </script>
 
 <template>
-  <div class="dashboard-page-container">
-    <!-- Hero Highlight Section (Apple Weather Style) -->
-    <div v-if="heroCity" class="hero-weather-banner glass-panel">
-      <div class="hero-header-row">
-        <div class="hero-badge">
-          <span class="live-dot"></span> LIVE METRICS
-        </div>
-        <el-button type="primary" link class="refresh-btn" @click="loadWeatherData">
-          🔄 데이터 동기화
-        </el-button>
+  <div class="toss-home-container">
+    <!-- Toss Primary Hero Card -->
+    <div v-if="heroCity" class="toss-hero-card">
+      <div class="hero-top">
+        <span class="toss-badge">실시간 관측</span>
+        <button class="refresh-link" @click="loadWeatherData">새로고침</button>
       </div>
 
-      <div class="hero-body-grid">
-        <div class="hero-left-info">
-          <h2 class="hero-city-name">{{ heroCity.name }}</h2>
-          <span class="hero-status-desc">{{ heroCity.status }}</span>
-          
-          <div class="hero-temp-box">
-            <span class="hero-temp-num">{{ heroTemp }}</span>
-            <span class="hero-temp-unit">{{ configStore.unitSymbol }}</span>
-          </div>
+      <div class="hero-content">
+        <div class="hero-city-group">
+          <h2 class="city-title">{{ heroCity.name }}</h2>
+          <p class="status-title">{{ heroCity.status }}</p>
         </div>
 
-        <div class="hero-right-metrics">
-          <div class="metric-chip">
-            <span class="metric-label">관측 상태</span>
-            <span class="metric-val">{{ heroCity.status }}</span>
-          </div>
-          <div class="metric-chip">
-            <span class="metric-label">체감 기온</span>
-            <span class="metric-val">{{ heroTemp }}{{ configStore.unitSymbol }}</span>
-          </div>
-          <div class="metric-chip">
-            <span class="metric-label">업데이트</span>
-            <span class="metric-val">실시간 동기화</span>
-          </div>
+        <div class="hero-temp-group">
+          <span class="big-temp">{{ heroTemp }}</span>
+          <span class="big-unit">{{ configStore.unitSymbol }}</span>
         </div>
       </div>
 
-      <!-- Quick City Selection Chips -->
-      <div class="hero-quick-chips">
-        <span class="chip-label">퀵 지역 선택:</span>
-        <button
-          v-for="city in quickCities"
-          :key="city.key"
-          class="quick-chip-btn"
-          :class="{ active: selectedHeroIndex === city.index }"
-          @click="handleSelectHeroCity(city.index, city.name)"
-        >
-          📍 {{ city.name }}
-        </button>
+      <!-- Quick City Selector Buttons -->
+      <div class="hero-city-chips">
+        <span class="chips-title">관측 지역</span>
+        <div class="chips-wrap">
+          <button
+            v-for="city in quickCities"
+            :key="city.key"
+            class="city-chip-btn"
+            :class="{ active: selectedHeroIndex === city.index }"
+            @click="handleSelectHeroCity(city.index, city.name)"
+          >
+            {{ city.name }}
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- Search & Filter Card Bar -->
-    <el-card class="search-filter-card" shadow="never">
-      <div class="search-flex-row">
-        <div class="search-input-wrapper">
-          <el-input
-            v-model="searchQuery"
-            placeholder="검색할 도시명을 입력하세요 (예: 서울, 수원, 부산)"
-            clearable
-            size="large"
-            @input="updateQuery"
-          >
-            <template #prefix>
-              <el-icon><i-ep-search /></el-icon>
-            </template>
-          </el-input>
-        </div>
-      </div>
-    </el-card>
+    <!-- Search Input Bar -->
+    <div class="toss-search-box">
+      <el-input
+        v-model="searchQuery"
+        placeholder="검색할 도시명을 입력하세요 (예: 서울, 수원, 부산)"
+        clearable
+        size="large"
+        class="toss-input"
+        @input="updateQuery"
+      >
+        <template #prefix>
+          <el-icon><i-ep-search /></el-icon>
+        </template>
+      </el-input>
+    </div>
 
-    <!-- Weather Cards Grid Area -->
-    <div class="grid-section">
-      <div class="section-title-bar">
-        <h3>🏙️ 대한민국 주요 지역 관측소 현황</h3>
-        <span class="count-tag">총 {{ filteredWeatherList.length }}개 지역</span>
+    <!-- Weather Cards Section -->
+    <div class="toss-section">
+      <div class="section-header">
+        <h3 class="section-title">주요 관측소 날씨</h3>
+        <span class="section-count">총 {{ filteredWeatherList.length }}개</span>
       </div>
 
-      <!-- Skeleton Loading -->
-      <div v-if="isLoading" class="skeleton-grid">
+      <div v-if="isLoading" class="skeleton-box">
         <el-skeleton :rows="3" animated />
       </div>
 
@@ -162,233 +139,196 @@ const handleDetailJump = (cityId) => {
         <StatusAlert :message="errorMessage" type="error" />
 
         <template v-if="!errorMessage">
-          <div class="cards-layout-grid">
+          <div class="cards-grid">
             <WeatherCard
               v-for="item in filteredWeatherList"
               :key="item.id"
               :city-item="item"
               @select-card="selectCity"
               @click-detail="handleDetailJump"
-            >
-              <template #actions="{ handleDetail }">
-                <el-button type="primary" size="small" @click.stop="handleDetail">
-                  상세 관측소 →
-                </el-button>
-              </template>
-            </WeatherCard>
+            />
           </div>
 
           <el-empty
             v-if="filteredWeatherList.length === 0"
-            description="검색 결과와 일치하는 도시가 없습니다."
-            :image-size="90"
+            description="검색 조건에 맞는 도시가 없습니다."
+            :image-size="80"
           />
         </template>
       </template>
 
       <!-- Status Footer Bar -->
-      <div class="status-footer-banner">
-        💡 {{ selectedCityInfo }}
+      <div class="status-banner">
+        안내: {{ selectedCityInfo }}
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.dashboard-page-container {
+.toss-home-container {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-/* Hero Weather Banner */
-.hero-weather-banner {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.95) 100%);
-  color: #ffffff;
-  padding: 28px 32px;
+/* Toss Hero Card */
+.toss-hero-card {
+  background: var(--toss-canvas);
+  border: 1px solid var(--toss-border);
   border-radius: 20px;
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 28px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
 }
 
-.hero-header-row {
+.hero-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: #38bdf8;
-  background: rgba(56, 189, 248, 0.1);
-  padding: 4px 10px;
-  border-radius: 20px;
+.refresh-link {
+  background: transparent;
+  border: none;
+  color: var(--toss-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.live-dot {
-  width: 8px;
-  height: 8px;
-  background-color: #38bdf8;
-  border-radius: 50%;
-  box-shadow: 0 0 8px #38bdf8;
+.refresh-link:hover {
+  color: var(--toss-blue);
 }
 
-.refresh-btn {
-  color: #94a3b8;
-}
-.refresh-btn:hover {
-  color: #38bdf8;
-}
-
-.hero-body-grid {
+.hero-content {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 24px;
+  align-items: flex-end;
   margin-bottom: 24px;
 }
 
-.hero-city-name {
+.city-title {
   margin: 0 0 4px 0;
-  font-size: 2.2rem;
-  font-weight: 800;
-  color: #f8fafc;
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--toss-foreground);
+  letter-spacing: -0.5px;
 }
 
-.hero-status-desc {
-  font-size: 1.1rem;
-  color: #cbd5e1;
+.status-title {
+  margin: 0;
+  font-size: 16px;
+  color: var(--toss-body);
 }
 
-.hero-temp-box {
+.hero-temp-group {
   display: flex;
   align-items: baseline;
-  margin-top: 12px;
 }
 
-.hero-temp-num {
-  font-size: 4rem;
-  font-weight: 900;
-  color: #38bdf8;
-  line-height: 1;
-  letter-spacing: -2px;
-}
-
-.hero-temp-unit {
-  font-size: 2rem;
+.big-temp {
+  font-size: 54px;
   font-weight: 700;
-  color: #94a3b8;
-  margin-left: 4px;
+  color: var(--toss-blue);
+  line-height: 1;
+  letter-spacing: -1.5px;
 }
 
-.hero-right-metrics {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+.big-unit {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--toss-muted);
+  margin-left: 2px;
+}
+
+.hero-city-chips {
+  border-top: 1px solid var(--toss-border);
+  padding-top: 20px;
+  display: flex;
+  align-items: center;
   gap: 12px;
 }
 
-.metric-chip {
-  background: rgba(255, 255, 255, 0.06);
-  padding: 12px 16px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  min-width: 110px;
-}
-
-.metric-label {
-  display: block;
-  font-size: 0.75rem;
-  color: #94a3b8;
-  margin-bottom: 4px;
-}
-
-.metric-val {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #f8fafc;
-}
-
-.hero-quick-chips {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 18px;
-}
-
-.chip-label {
-  font-size: 0.85rem;
-  color: #94a3b8;
+.chips-title {
+  font-size: 14px;
   font-weight: 600;
+  color: var(--toss-body);
 }
 
-.quick-chip-btn {
-  background: rgba(255, 255, 255, 0.1);
-  color: #cbd5e1;
+.chips-wrap {
+  display: flex;
+  gap: 8px;
+}
+
+.city-chip-btn {
+  background: var(--toss-surface);
+  color: var(--toss-body);
   border: none;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 0.85rem;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
-.quick-chip-btn:hover,
-.quick-chip-btn.active {
-  background: #38bdf8;
-  color: #0f172a;
+.city-chip-btn.active {
+  background: var(--toss-weak-bg);
+  color: var(--toss-weak-fg);
 }
 
-/* Search Card */
-.search-filter-card {
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
+/* Search Box */
+.toss-search-box :deep(.el-input__wrapper) {
+  border-radius: 14px !important;
+  box-shadow: none !important;
+  border: 1px solid var(--toss-border) !important;
+  padding: 8px 16px !important;
 }
 
-.section-title-bar {
+.toss-search-box :deep(.el-input__wrapper.is-focus) {
+  border-color: var(--toss-blue) !important;
+}
+
+/* Cards Section */
+.toss-section {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.section-title-bar h3 {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.count-tag {
-  font-size: 0.85rem;
-  color: #64748b;
-  font-weight: 600;
-}
-
-.cards-layout-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  flex-direction: column;
   gap: 16px;
 }
 
-.status-footer-banner {
-  margin-top: 20px;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  padding: 12px 18px;
-  text-align: center;
-  color: #166534;
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 18px;
   font-weight: 700;
+  color: var(--toss-foreground);
+}
+
+.section-count {
+  font-size: 14px;
+  color: var(--toss-muted);
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.status-banner {
+  background: var(--toss-surface);
+  border: 1px solid var(--toss-border);
+  padding: 12px 16px;
+  text-align: center;
+  color: var(--toss-body);
+  font-weight: 600;
   border-radius: 12px;
-  font-size: 0.9rem;
+  font-size: 14px;
 }
 </style>

@@ -23,196 +23,167 @@ watch(selectedCityKey, (newKey) => {
 </script>
 
 <template>
-  <el-card class="air-card" shadow="never">
-    <template #header>
-      <div class="air-header">
-        <div>
-          <h3>🍃 실시간 대기질 및 미세먼지 관측</h3>
-          <p class="sub-desc">대기 오염 지수(AQI) 및 미세먼지/가스 성분 농도를 분석합니다.</p>
-        </div>
-        <el-tag type="success" effect="dark">Air Quality Index</el-tag>
-      </div>
-    </template>
+  <div class="toss-air-container">
+    <div class="page-title-box">
+      <h2 class="page-title">대기질 분석</h2>
+      <p class="page-desc">통합 대기 오염 지수(AQI) 및 미세먼지 성분 농도입니다.</p>
+    </div>
 
     <!-- 공통 도시 선택 컴포넌트 -->
     <CitySelector
       v-model="selectedCityKey"
       :options="cityOptions"
-      label="대기질 관측 지역"
+      label="관측 지역"
     />
 
-    <!-- 로딩 스켈레톤 -->
-    <div v-if="isLoading" class="skeleton-wrapper">
+    <div v-if="isLoading" class="skeleton-box">
       <el-skeleton :rows="5" animated />
     </div>
 
     <template v-else>
       <StatusAlert :message="errorMessage" type="error" />
 
-      <div v-if="airData" class="air-content-body">
-        <!-- AQI 수치 프로그레스 카드 -->
-        <el-card shadow="hover" class="aqi-summary-card">
-          <div class="aqi-flex-box">
-            <div class="aqi-left">
-              <h4>📍 {{ airData.cityName }} 통합 대기 환경 지수</h4>
-              <div class="aqi-status-text">
-                <el-tag :type="getAqiStatus(airData.aqi).type" size="large" effect="dark">
-                  {{ getAqiStatus(airData.aqi).label }}
-                </el-tag>
-                <span class="aqi-level-num">지수 레벨: {{ airData.aqi }} / 5</span>
-              </div>
-            </div>
-
-            <div class="aqi-right">
-              <el-progress
-                type="dashboard"
-                :percentage="getAqiStatus(airData.aqi).percent"
-                :color="getAqiStatus(airData.aqi).color"
-                :width="120"
-              >
-                <template #default>
-                  <span class="progress-inner-text">AQI {{ airData.aqi }}</span>
-                </template>
-              </el-progress>
+      <div v-if="airData" class="air-body">
+        <!-- Toss AQI Summary Card -->
+        <div class="toss-aqi-card">
+          <div class="aqi-left">
+            <span class="location-name">{{ airData.cityName }} 대기 환경</span>
+            <div class="aqi-badge-wrap">
+              <span class="toss-badge">
+                {{ getAqiStatus(airData.aqi).label.replace(/[🟢🔵🟡🟠🔴]/g, '').trim() }}
+              </span>
+              <span class="aqi-score">지수 {{ airData.aqi }} / 5</span>
             </div>
           </div>
-        </el-card>
 
-        <!-- 미세먼지 및 가스 상세 농도 Grid 카드 -->
-        <div class="pollutants-grid">
-          <div class="pollutant-card highlighted">
-            <span class="p-title">초미세먼지 (PM2.5)</span>
-            <span class="p-value">{{ airData.pm2_5 }} <small>µg/m³</small></span>
+          <div class="aqi-right">
+            <el-progress
+              type="circle"
+              :percentage="getAqiStatus(airData.aqi).percent"
+              :color="getAqiStatus(airData.aqi).color"
+              :width="90"
+            />
+          </div>
+        </div>
+
+        <!-- Air Pollutants Grid Cards -->
+        <div class="air-grid">
+          <div class="air-item-card">
+            <span class="item-name">초미세먼지 (PM2.5)</span>
+            <span class="item-val">{{ airData.pm2_5 }} <small>µg/m³</small></span>
           </div>
 
-          <div class="pollutant-card highlighted">
-            <span class="p-title">미세먼지 (PM10)</span>
-            <span class="p-value">{{ airData.pm10 }} <small>µg/m³</small></span>
+          <div class="air-item-card">
+            <span class="item-name">미세먼지 (PM10)</span>
+            <span class="item-val">{{ airData.pm10 }} <small>µg/m³</small></span>
           </div>
 
-          <div class="pollutant-card">
-            <span class="p-title">이산화질소 (NO2)</span>
-            <span class="p-value">{{ airData.no2 }} <small>µg/m³</small></span>
+          <div class="air-item-card">
+            <span class="item-name">이산화질소 (NO2)</span>
+            <span class="item-val">{{ airData.no2 }} <small>µg/m³</small></span>
           </div>
 
-          <div class="pollutant-card">
-            <span class="p-title">오존 (O3)</span>
-            <span class="p-value">{{ airData.o3 }} <small>µg/m³</small></span>
+          <div class="air-item-card">
+            <span class="item-name">오존 (O3)</span>
+            <span class="item-val">{{ airData.o3 }} <small>µg/m³</small></span>
           </div>
 
-          <div class="pollutant-card">
-            <span class="p-title">일산화탄소 (CO)</span>
-            <span class="p-value">{{ airData.co }} <small>µg/m³</small></span>
+          <div class="air-item-card">
+            <span class="item-name">일산화탄소 (CO)</span>
+            <span class="item-val">{{ airData.co }} <small>µg/m³</small></span>
           </div>
         </div>
       </div>
     </template>
-  </el-card>
+  </div>
 </template>
 
 <style scoped>
-.air-card {
-  border-radius: 16px;
-  background: #ffffff;
-}
-
-.air-header {
+.toss-air-container {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.air-header h3 {
+.page-title-box {
+  margin-bottom: 8px;
+}
+
+.page-title {
   margin: 0 0 4px 0;
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: #0f172a;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--toss-foreground);
 }
 
-.sub-desc {
+.page-desc {
   margin: 0;
-  font-size: 0.85rem;
-  color: #64748b;
+  font-size: 14px;
+  color: var(--toss-muted);
 }
 
-.skeleton-wrapper {
-  padding: 20px 0;
-}
-
-.aqi-summary-card {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  color: #ffffff;
+.toss-aqi-card {
+  background: var(--toss-canvas);
+  border: 1px solid var(--toss-border);
   border-radius: 16px;
-  margin-bottom: 20px;
-  border: none;
-}
-
-.aqi-flex-box {
+  padding: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 16px;
 }
 
-.aqi-left h4 {
-  margin: 0 0 14px 0;
-  font-size: 1.1rem;
-  color: #f8fafc;
+.location-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--toss-foreground);
+  display: block;
+  margin-bottom: 10px;
 }
 
-.aqi-status-text {
+.aqi-badge-wrap {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
-.aqi-level-num {
-  font-size: 0.9rem;
-  color: #cbd5e1;
+.aqi-score {
+  font-size: 14px;
+  color: var(--toss-muted);
   font-weight: 600;
 }
 
-.progress-inner-text {
-  font-weight: 800;
-  font-size: 1.1rem;
-  color: #ffffff;
-}
-
-.pollutants-grid {
+.air-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 12px;
 }
 
-.pollutant-card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+.air-item-card {
+  background: var(--toss-canvas);
+  border: 1px solid var(--toss-border);
+  border-radius: 14px;
   padding: 16px;
-  border-radius: 12px;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.pollutant-card.highlighted {
-  border-color: #38bdf8;
-  background: #f0f9ff;
-}
-
-.p-title {
-  font-size: 0.8rem;
-  color: #64748b;
+.item-name {
+  font-size: 13px;
+  color: var(--toss-muted);
   font-weight: 600;
 }
 
-.p-value {
-  font-size: 1.3rem;
-  font-weight: 800;
-  color: #0f172a;
+.item-val {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--toss-foreground);
 }
 
-.p-value small {
-  font-size: 0.75rem;
+.item-val small {
+  font-size: 12px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--toss-muted);
 }
 </style>

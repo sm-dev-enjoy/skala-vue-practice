@@ -9,76 +9,108 @@ const handleGoHome = () => {
 </script>
 
 <template>
-  <el-card class="about-card" shadow="never">
-    <template #header>
-      <div class="about-header">
-        <h3>ℹ️ 서비스 및 시스템 기술 아키텍처</h3>
-        <el-tag type="info" size="small">Vue 3 + Vite</el-tag>
+  <div class="toss-about-container">
+    <div class="page-title-box">
+      <h2 class="page-title">서비스 소개</h2>
+      <p class="page-desc">날씨 인사이트의 기술 구성 및 핵심 로직 안내입니다.</p>
+    </div>
+
+    <div class="about-card">
+      <h3 class="card-section-title">시스템 아키텍처</h3>
+
+      <div class="feature-list">
+        <div class="feature-item">
+          <span class="f-title">Vue 3 Composition API & Pinia</span>
+          <p class="f-desc">전역 온도 단위(섭씨/화씨) 상태와 컴포저블 비즈니스 로직을 온전히 분리하여 유지보수성을 극대화했습니다.</p>
+        </div>
+
+        <div class="feature-item">
+          <span class="f-title">OpenWeatherMap REST API 연동</span>
+          <p class="f-desc">실시간 기상 정보, 5일/3시간 단기 예보 및 통합 대기질(AQI) 파이프라인을 비동기로 수신합니다.</p>
+        </div>
+
+        <div class="feature-item">
+          <span class="f-title">토스 디자인 시스템 (TDS) UI 스펙</span>
+          <p class="f-desc">시그니처 컬러(#3182f6), 16px 둥근 카드, 직관적인 텍스트 레이블로 사용자 경험을 최적화했습니다.</p>
+        </div>
       </div>
-    </template>
 
-    <div class="about-intro">
-      <p>
-        본 애플리케이션은 <strong>Vue 3 Composition API</strong> 및 <strong>OpenWeatherMap REST API</strong>를 기반으로 구축된 기상 관측 및 통합 대기 환경 분석 시스템입니다.
-      </p>
+      <div class="action-row">
+        <el-button type="primary" size="large" style="width: 100%" @click="handleGoHome">
+          메인 대시보드로 돌아가기
+        </el-button>
+      </div>
     </div>
-
-    <el-divider content-position="left">핵심 기술 구현 포인트</el-divider>
-
-    <el-timeline style="padding-left: 8px">
-      <el-timeline-item timestamp="UI & Design System" placement="top" type="primary">
-        <el-card shadow="hover">
-          <h4>Element Plus & Design System</h4>
-          <p>Vanilla CSS 기반 토큰과 Element Plus 컴포넌트를 조화시켜 직관적이고 반응성 높은 인터페이스를 구성했습니다.</p>
-        </el-card>
-      </el-timeline-item>
-
-      <el-timeline-item timestamp="State & Routing" placement="top" type="success">
-        <el-card shadow="hover">
-          <h4>Pinia & Vue Router 4</h4>
-          <p>전역 온도 단위(섭씨/화씨) 상태 관리 및 URL 쿼리 파라미터 기반의 동적 필터링을 완벽하게 동기화했습니다.</p>
-        </el-card>
-      </el-timeline-item>
-
-      <el-timeline-item timestamp="Modern JS (ES6+)" placement="top" type="warning">
-        <el-card shadow="hover">
-          <h4>Modern JavaScript 문법 적용</h4>
-          <p>Destructuring(구조분해 할당), Spread operator(전개 연산자), Optional chaining(?.), Nullish coalescing(??) 등의 문법을 적극 적용하여 안전하고 가독성 높은 코드를 작성했습니다.</p>
-        </el-card>
-      </el-timeline-item>
-    </el-timeline>
-
-    <div class="action-footer">
-      <el-button type="primary" size="large" style="width: 100%" @click="handleGoHome">
-        대시보드 홈으로 이동
-      </el-button>
-    </div>
-  </el-card>
+  </div>
 </template>
 
 <style scoped>
-.about-card {
-  border-radius: 8px;
-}
-
-.about-header {
+.toss-about-container {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.about-header h3 {
+.page-title-box {
+  margin-bottom: 8px;
+}
+
+.page-title {
+  margin: 0 0 4px 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--toss-foreground);
+}
+
+.page-desc {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 14px;
+  color: var(--toss-muted);
 }
 
-.about-intro {
-  color: #475569;
-  line-height: 1.6;
-  font-size: 0.95rem;
+.about-card {
+  background: var(--toss-canvas);
+  border: 1px solid var(--toss-border);
+  border-radius: 16px;
+  padding: 24px;
 }
 
-.action-footer {
-  margin-top: 24px;
+.card-section-title {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--toss-foreground);
+}
+
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.feature-item {
+  background: var(--toss-surface);
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.f-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--toss-foreground);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.f-desc {
+  margin: 0;
+  font-size: 14px;
+  color: var(--toss-body);
+  line-height: 1.5;
+}
+
+.action-row {
+  margin-top: 16px;
 }
 </style>

@@ -30,130 +30,121 @@ const displayFeelsLike = computed(() => formatTemperature(cityData.value?.feelsL
 </script>
 
 <template>
-  <el-card class="detail-card glass-panel" shadow="never">
-    <template #header>
-      <div class="detail-header">
-        <div>
-          <h3>📊 지역별 상세 기상 관측 센터</h3>
-          <p class="sub-desc">지정 관측소의 정밀 기상 및 대기 환경 분석 데이터입니다.</p>
-        </div>
-        <el-tag type="success" effect="dark">Station Live</el-tag>
-      </div>
-    </template>
+  <div class="toss-detail-container">
+    <div class="page-title-box">
+      <h2 class="page-title">관측소 상세 정보</h2>
+      <p class="page-desc">해당 지역의 상세 기상 분석 결과입니다.</p>
+    </div>
 
-    <div v-if="isLoading" class="skeleton-block">
+    <div v-if="isLoading" class="skeleton-box">
       <el-skeleton :rows="5" animated />
     </div>
 
     <template v-else>
       <StatusAlert :message="errorMessage" type="warning" />
 
-      <div v-if="cityData" class="detail-content-wrapper">
-        <!-- City Header Banner -->
-        <div class="station-banner-card">
-          <div class="banner-left">
-            <h2 class="st-name">📍 {{ cityData.name }}</h2>
-            <span class="st-eng">OpenWeather ID: {{ cityData.englishName }} | Country: {{ cityData.country }}</span>
+      <div v-if="cityData" class="detail-body">
+        <!-- Toss Banner Card -->
+        <div class="banner-card">
+          <div class="banner-info">
+            <h3 class="city-name">{{ cityData.name }}</h3>
+            <span class="sub-info">{{ cityData.englishName }} | {{ cityData.country }}</span>
           </div>
 
           <div class="banner-temp">
-            <span class="big-temp">{{ displayTemp }}</span>
-            <span class="big-unit">{{ configStore.unitSymbol }}</span>
+            <span class="temp-val">{{ displayTemp }}</span>
+            <span class="temp-unit">{{ configStore.unitSymbol }}</span>
           </div>
         </div>
 
-        <!-- Metric Grid Cards -->
+        <!-- Detail Metrics Grid -->
         <div class="metrics-grid">
-          <div class="m-card">
-            <span class="m-label">🌡️ 실시간 기온</span>
-            <span class="m-val">{{ displayTemp }}{{ configStore.unitSymbol }}</span>
+          <div class="metric-card">
+            <span class="m-title">실시간 기온</span>
+            <span class="m-value">{{ displayTemp }}{{ configStore.unitSymbol }}</span>
           </div>
 
-          <div class="m-card">
-            <span class="m-label">🤒 체감 온도</span>
-            <span class="m-val">{{ displayFeelsLike }}{{ configStore.unitSymbol }}</span>
+          <div class="metric-card">
+            <span class="m-title">체감 온도</span>
+            <span class="m-value">{{ displayFeelsLike }}{{ configStore.unitSymbol }}</span>
           </div>
 
-          <div class="m-card">
-            <span class="m-label">☁️ 기상 현황</span>
-            <span class="m-val">{{ cityData.status }}</span>
+          <div class="metric-card">
+            <span class="m-title">기상 현황</span>
+            <span class="m-value">{{ cityData.status }}</span>
           </div>
 
-          <div class="m-card">
-            <span class="m-label">💧 대기 습도</span>
-            <span class="m-val">{{ cityData.humidity }}</span>
+          <div class="metric-card">
+            <span class="m-title">대기 습도</span>
+            <span class="m-value">{{ cityData.humidity }}</span>
           </div>
 
-          <div class="m-card">
-            <span class="m-label">🍃 풍속</span>
-            <span class="m-val">{{ cityData.windSpeed }}</span>
+          <div class="metric-card">
+            <span class="m-title">풍속</span>
+            <span class="m-value">{{ cityData.windSpeed }}</span>
           </div>
 
-          <div class="m-card">
-            <span class="m-label">⏲️ 기압</span>
-            <span class="m-val">{{ cityData.pressure }}</span>
+          <div class="metric-card">
+            <span class="m-title">기압</span>
+            <span class="m-value">{{ cityData.pressure }}</span>
           </div>
         </div>
       </div>
     </template>
 
-    <div class="card-footer">
-      <el-button type="info" plain size="large" @click="router.push('/')">
-        ← 메인 대시보드로 돌아가기
+    <div class="footer-action">
+      <el-button type="primary" size="large" @click="router.push('/')">
+        메인 대시보드로 돌아가기
       </el-button>
     </div>
-  </el-card>
+  </div>
 </template>
 
 <style scoped>
-.detail-card {
-  border-radius: 16px;
-  background: #ffffff;
-}
-
-.detail-header {
+.toss-detail-container {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.detail-header h3 {
+.page-title-box {
+  margin-bottom: 8px;
+}
+
+.page-title {
   margin: 0 0 4px 0;
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: #0f172a;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--toss-foreground);
 }
 
-.sub-desc {
+.page-desc {
   margin: 0;
-  font-size: 0.85rem;
-  color: #64748b;
+  font-size: 14px;
+  color: var(--toss-muted);
 }
 
-.skeleton-block {
-  padding: 20px 0;
-}
-
-.station-banner-card {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  color: #ffffff;
-  padding: 24px 28px;
+.banner-card {
+  background: var(--toss-canvas);
+  border: 1px solid var(--toss-border);
   border-radius: 16px;
+  padding: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
-.st-name {
-  margin: 0 0 6px 0;
-  font-size: 1.6rem;
-  font-weight: 800;
+.city-name {
+  margin: 0 0 4px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--toss-foreground);
 }
 
-.st-eng {
-  font-size: 0.85rem;
-  color: #94a3b8;
+.sub-info {
+  font-size: 13px;
+  color: var(--toss-muted);
 }
 
 .banner-temp {
@@ -161,51 +152,50 @@ const displayFeelsLike = computed(() => formatTemperature(cityData.value?.feelsL
   align-items: baseline;
 }
 
-.big-temp {
-  font-size: 3.5rem;
-  font-weight: 900;
-  color: #38bdf8;
+.temp-val {
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--toss-blue);
   line-height: 1;
 }
 
-.big-unit {
-  font-size: 1.6rem;
-  color: #cbd5e1;
-  font-weight: 700;
+.temp-unit {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--toss-muted);
   margin-left: 2px;
 }
 
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 12px;
-  margin-bottom: 24px;
 }
 
-.m-card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+.metric-card {
+  background: var(--toss-canvas);
+  border: 1px solid var(--toss-border);
+  border-radius: 14px;
   padding: 16px;
-  border-radius: 12px;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.m-label {
-  font-size: 0.8rem;
-  color: #64748b;
+.m-title {
+  font-size: 13px;
+  color: var(--toss-muted);
   font-weight: 600;
 }
 
-.m-val {
-  font-size: 1.3rem;
-  font-weight: 800;
-  color: #0f172a;
+.m-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--toss-foreground);
 }
 
-.card-footer {
-  margin-top: 20px;
+.footer-action {
+  margin-top: 12px;
   display: flex;
   justify-content: flex-end;
 }

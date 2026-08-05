@@ -22,122 +22,115 @@ const handleDetailClick = () => {
 </script>
 
 <template>
-  <el-card
-    class="premium-weather-card"
-    shadow="hover"
-    @click="emit('select-card', `${cityItem.name} 관측소가 선택되었습니다.`)"
+  <div
+    class="toss-weather-card"
+    @click="emit('select-card', `${cityItem.name} 관측소를 선택했습니다.`)"
   >
-    <div class="card-main-content">
-      <div class="city-info-left">
-        <h4 class="city-title">{{ cityItem.name }}</h4>
-        <span class="status-text">{{ cityItem.status }}</span>
-        
-        <div class="temp-badge-row">
-          <span v-if="cityItem.temp >= 28" class="weather-pill hot">🔥 덥고 무더움</span>
-          <span v-else-if="cityItem.temp >= 20" class="weather-pill warm">🌤️ 쾌적함</span>
-          <span v-else class="weather-pill cool">❄️ 쌀쌀함</span>
+    <div class="card-main">
+      <div class="left-box">
+        <h4 class="city-name">{{ cityItem.name }}</h4>
+        <span class="status-label">{{ cityItem.status }}</span>
+
+        <div class="badge-group">
+          <span v-if="cityItem.temp >= 28" class="toss-badge danger">고온 경보</span>
+          <span v-else-if="cityItem.temp >= 20" class="toss-badge">적정 기온</span>
+          <span v-else class="toss-badge">저온</span>
         </div>
       </div>
 
-      <div class="temp-right">
-        <span class="temp-value">{{ displayTemp }}</span>
+      <div class="right-temp">
+        <span class="temp-number">{{ displayTemp }}</span>
         <span class="temp-unit">{{ configStore.unitSymbol }}</span>
       </div>
     </div>
 
-    <div class="card-action-bar">
+    <div class="card-bottom">
       <slot name="actions" :city-item="cityItem" :handle-detail="handleDetailClick">
-        <el-button type="primary" size="small" @click.stop="handleDetailClick">
-          상세 정보 →
-        </el-button>
+        <button class="toss-btn-text" @click.stop="handleDetailClick">
+          상세 정보 보기
+        </button>
       </slot>
     </div>
-  </el-card>
+  </div>
 </template>
 
 <style scoped>
-.premium-weather-card {
-  border-radius: 14px;
-  transition: all 0.3s ease;
-  border: 1px solid #e2e8f0;
+.toss-weather-card {
+  background: var(--toss-canvas);
+  border: 1px solid var(--toss-border);
+  border-radius: 16px;
+  padding: 20px;
   cursor: pointer;
-  margin-bottom: 12px;
+  transition: all 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-.premium-weather-card:hover {
-  border-color: #38bdf8;
-  transform: translateY(-2px);
+.toss-weather-card:hover {
+  border-color: #b0c4de;
+  transform: translateY(-1px);
 }
 
-.card-main-content {
+.card-main {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
+  align-items: flex-start;
+  margin-bottom: 16px;
 }
 
-.city-title {
-  margin: 0 0 4px 0;
-  font-size: 1.2rem;
+.city-name {
+  margin: 0 0 2px 0;
+  font-size: 18px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--toss-foreground);
 }
 
-.status-text {
-  font-size: 0.9rem;
-  color: #64748b;
+.status-label {
+  font-size: 14px;
+  color: var(--toss-body);
   display: block;
   margin-bottom: 8px;
 }
 
-.temp-badge-row {
-  display: flex;
-  gap: 6px;
-}
-
-.weather-pill {
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 12px;
-  color: #ffffff;
-}
-
-.hot {
-  background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
-}
-
-.warm {
-  background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
-}
-
-.cool {
-  background: linear-gradient(135deg, #64748b 0%, #94a3b8 100%);
-}
-
-.temp-right {
+.right-temp {
   display: flex;
   align-items: baseline;
 }
 
-.temp-value {
-  font-size: 2.2rem;
-  font-weight: 800;
-  color: #0284c7;
+.temp-number {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--toss-blue);
   letter-spacing: -1px;
 }
 
 .temp-unit {
-  font-size: 1.1rem;
+  font-size: 16px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--toss-muted);
   margin-left: 2px;
 }
 
-.card-action-bar {
+.card-bottom {
   display: flex;
   justify-content: flex-end;
-  border-top: 1px solid #f1f5f9;
-  padding-top: 10px;
+  border-top: 1px solid var(--toss-border);
+  padding-top: 12px;
+}
+
+.toss-btn-text {
+  background: transparent;
+  border: none;
+  color: var(--toss-blue);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.toss-btn-text:hover {
+  color: var(--toss-blue-hover);
+  text-decoration: underline;
 }
 </style>
