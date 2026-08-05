@@ -7,6 +7,16 @@ const routes = [
     component: () => import('../views/WeatherHomeView.vue'),
   },
   {
+    path: '/forecast',
+    name: 'WeatherForecast',
+    component: () => import('../views/WeatherForecastView.vue'),
+  },
+  {
+    path: '/air',
+    name: 'WeatherAir',
+    component: () => import('../views/WeatherAirView.vue'),
+  },
+  {
     path: '/about',
     name: 'WeatherAbout',
     component: () => import('../views/WeatherAboutView.vue'),
