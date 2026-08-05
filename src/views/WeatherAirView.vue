@@ -115,8 +115,9 @@ watch(
         @retry="loadAirPollution"
       />
 
-      <div v-if="isLoading" class="skeleton-box" aria-label="대기질 정보를 불러오는 중">
-        <el-skeleton :rows="6" animated />
+      <div v-if="isLoading" class="clean-loader-card" aria-label="대기질 정보를 불러오는 중">
+        <div class="loader-spinner"></div>
+        <p class="loader-text">대기질 분석 데이터를 불러오고 있습니다...</p>
       </div>
 
       <template v-else-if="airData">
@@ -229,6 +230,41 @@ watch(
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.clean-loader-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 24px;
+  background: var(--toss-canvas);
+  border: 1px solid var(--toss-border);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(25, 31, 40, 0.03);
+}
+
+.loader-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--toss-border);
+  border-top-color: var(--toss-blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loader-text {
+  margin: 0;
+  color: var(--toss-muted);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .page-title {

@@ -106,9 +106,10 @@ watch(searchQuery, (nextQuery) => {
   <div class="home-container">
     <h1 class="sr-only">전국 현재 날씨</h1>
 
-    <!-- 로딩 중일 때 부드러운 스켈레톤 히어로 카드 -->
-    <div v-if="isLoading && !heroCity" class="skeleton-box">
-      <el-skeleton :rows="4" animated />
+    <!-- 로딩 중일 때 파란색 사각형 박스가 뜨지 않는 깔끔한 히어로 카드 로더 -->
+    <div v-if="isLoading && !heroCity" class="clean-loader-card">
+      <div class="loader-spinner"></div>
+      <p class="loader-text">전국 주요 도시 날씨 정보를 불러오는 중입니다...</p>
     </div>
 
     <section v-else-if="heroCity" class="hero-card" aria-labelledby="hero-city-title">
@@ -213,8 +214,10 @@ watch(searchQuery, (nextQuery) => {
       />
       <StatusAlert :message="partialFailureMessage" type="warning" />
 
-      <div v-if="isLoading && weatherList.length === 0" class="skeleton-box" aria-label="현재 날씨를 불러오는 중">
-        <el-skeleton :rows="4" animated />
+      <!-- 로딩 시 파란색 사각형이 노출되지 않는 깔끔한 로더 -->
+      <div v-if="isLoading && weatherList.length === 0" class="clean-loader-card">
+        <div class="loader-spinner"></div>
+        <p class="loader-text">전국 날씨 목록을 불러오고 있습니다...</p>
       </div>
 
       <template v-else-if="!errorMessage">
@@ -238,6 +241,42 @@ watch(searchQuery, (nextQuery) => {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+/* 로딩 중 파란색 사각형 없는 깔끔한 로더 카드 */
+.clean-loader-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 24px;
+  background: var(--toss-canvas);
+  border: 1px solid var(--toss-border);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(25, 31, 40, 0.03);
+}
+
+.loader-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--toss-border);
+  border-top-color: var(--toss-blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loader-text {
+  margin: 0;
+  color: var(--toss-muted);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .hero-card,
