@@ -40,6 +40,11 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
+*:focus,
+*:focus-visible {
+  outline: none !important;
+}
+
 /* Toss Style Card Container */
 .toss-card {
   background: var(--toss-canvas);

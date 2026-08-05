@@ -78,9 +78,9 @@ select {
   font: inherit;
 }
 
+:focus,
 :focus-visible {
-  outline: 3px solid #1b64da;
-  outline-offset: 3px;
+  outline: none !important;
 }
 
 .sr-only {
