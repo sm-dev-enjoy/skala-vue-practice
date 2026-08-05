@@ -34,10 +34,16 @@ const heroWeatherIcon = computed(() => {
   return 'cloud'
 })
 
+// 주요 거점 도시 퀵 하이라이트 칩
 const quickCities = [
-  { name: '서울', key: 'Seoul', index: 0 },
-  { name: '수원', key: 'Suwon', index: 1 },
-  { name: '부산', key: 'Busan', index: 2 },
+  { name: '서울', index: 0 },
+  { name: '수원', index: 1 },
+  { name: '부산', index: 2 },
+  { name: '인천', index: 3 },
+  { name: '대구', index: 4 },
+  { name: '대전', index: 5 },
+  { name: '광주', index: 6 },
+  { name: '제주', index: 8 },
 ]
 
 const loadWeatherData = async () => {
@@ -73,10 +79,6 @@ const handleSelectHeroCity = (index, name) => {
   selectCity(`${name} 관측소가 메인 하이라이트에 선택되었습니다.`)
 }
 
-const handleQuickSearchKeyword = (keyword) => {
-  updateQuery(keyword)
-}
-
 const handleDetailJump = (cityId) => {
   router.push(`/weather/${cityId}`)
 }
@@ -89,7 +91,7 @@ const handleDetailJump = (cityId) => {
       <div class="hero-top">
         <div class="hero-tag">
           <SvgIcon name="sparkles" size="14" color="#1b64da" />
-          <span>실시간 관측</span>
+          <span>전국 실시간 관측소</span>
         </div>
 
         <button class="refresh-link" @click="loadWeatherData">
@@ -118,11 +120,11 @@ const handleDetailJump = (cityId) => {
 
       <!-- Quick City Selector Buttons -->
       <div class="hero-city-chips">
-        <span class="chips-title">관측 지역 선택:</span>
+        <span class="chips-title">주요 관측 지역:</span>
         <div class="chips-wrap">
           <button
             v-for="city in quickCities"
-            :key="city.key"
+            :key="city.name"
             class="city-chip-btn"
             :class="{ active: selectedHeroIndex === city.index }"
             @click="handleSelectHeroCity(city.index, city.name)"
@@ -133,44 +135,31 @@ const handleDetailJump = (cityId) => {
       </div>
     </div>
 
-    <!-- Search Input Box & Quick Keywords -->
-    <div class="toss-search-wrapper">
-      <div class="toss-search-box">
-        <el-input
-          v-model="searchQuery"
-          placeholder="검색할 도시명을 입력하세요 (예: 서울, 수원, 부산)"
-          clearable
-          size="large"
-          class="toss-input"
-          @input="updateQuery"
-        >
-          <template #prefix>
-            <el-icon><i-ep-search /></el-icon>
-          </template>
-        </el-input>
-      </div>
-
-      <!-- 퀵 필터 키워드 칩 -->
-      <div class="quick-keywords-row">
-        <span class="kw-label">인기 검색어:</span>
-        <div class="kw-chips">
-          <button class="kw-btn" @click="handleQuickSearchKeyword('')">전체</button>
-          <button class="kw-btn" @click="handleQuickSearchKeyword('서울')">서울</button>
-          <button class="kw-btn" @click="handleQuickSearchKeyword('수원')">수원</button>
-          <button class="kw-btn" @click="handleQuickSearchKeyword('부산')">부산</button>
-        </div>
-      </div>
+    <!-- Search Input Box (인기 검색어 섹션 완전 삭제) -->
+    <div class="toss-search-box">
+      <el-input
+        v-model="searchQuery"
+        placeholder="전국 14개 관측소 도시명을 검색하세요 (예: 서울, 인천, 대구, 광주, 제주...)"
+        clearable
+        size="large"
+        class="toss-input"
+        @input="updateQuery"
+      >
+        <template #prefix>
+          <el-icon><i-ep-search /></el-icon>
+        </template>
+      </el-input>
     </div>
 
     <!-- Weather Cards Section -->
     <div class="toss-section">
       <div class="section-header">
-        <h3 class="section-title">주요 관측소 날씨</h3>
+        <h3 class="section-title">전국 주요 관측소 날씨</h3>
         <span class="section-count">총 {{ filteredWeatherList.length }}개</span>
       </div>
 
       <div v-if="isLoading" class="skeleton-box">
-        <el-skeleton :rows="3" animated />
+        <el-skeleton :rows="4" animated />
       </div>
 
       <template v-else>
@@ -320,11 +309,13 @@ const handleDetailJump = (cityId) => {
   font-size: 14px;
   font-weight: 600;
   color: var(--toss-body);
+  white-space: nowrap;
 }
 
 .chips-wrap {
   display: flex;
   gap: 8px;
+  overflow-x: auto;
 }
 
 .city-chip-btn {
@@ -336,6 +327,7 @@ const handleDetailJump = (cityId) => {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
   transition: all 0.15s ease;
 }
 
@@ -344,13 +336,7 @@ const handleDetailJump = (cityId) => {
   color: var(--toss-weak-fg);
 }
 
-/* Search Wrapper & Keywords */
-.toss-search-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
+/* Search Box */
 .toss-search-box :deep(.el-input__wrapper) {
   border-radius: 14px !important;
   box-shadow: none !important;
@@ -360,41 +346,6 @@ const handleDetailJump = (cityId) => {
 
 .toss-search-box :deep(.el-input__wrapper.is-focus) {
   border-color: var(--toss-blue) !important;
-}
-
-.quick-keywords-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 4px;
-}
-
-.kw-label {
-  font-size: 13px;
-  color: var(--toss-muted);
-  font-weight: 600;
-}
-
-.kw-chips {
-  display: flex;
-  gap: 6px;
-}
-
-.kw-btn {
-  background: var(--toss-canvas);
-  border: 1px solid var(--toss-border);
-  color: var(--toss-body);
-  padding: 4px 10px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.kw-btn:hover {
-  border-color: var(--toss-blue);
-  color: var(--toss-blue);
 }
 
 /* Cards Section */

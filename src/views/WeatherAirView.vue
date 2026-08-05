@@ -8,13 +8,24 @@ import SvgIcon from '../components/common/SvgIcon.vue'
 const selectedCityKey = ref('seoul')
 const { isLoading, errorMessage, airData, getAqiStatus, fetchAirPollution } = useAirPollution()
 
+// 대한민국 14개 주요 도시 대기질 옵션
 const cityOptions = [
   { label: '서울', value: 'seoul' },
-  { label: '수원', value: 'suwon' },
   { label: '부산', value: 'busan' },
+  { label: '인천', value: 'incheon' },
+  { label: '대구', value: 'daegu' },
+  { label: '대전', value: 'daejeon' },
+  { label: '광주', value: 'gwangju' },
+  { label: '울산', value: 'ulsan' },
+  { label: '수원', value: 'suwon' },
+  { label: '제주', value: 'jeju' },
+  { label: '춘천', value: 'chuncheon' },
+  { label: '강릉', value: 'gangneung' },
+  { label: '전주', value: 'jeonju' },
+  { label: '청주', value: 'cheongju' },
+  { label: '창원', value: 'changwon' },
 ]
 
-// AQI 레벨별 실생활 행동 가이드 팁
 const healthAdvice = computed(() => {
   const aqi = airData.value?.aqi ?? 1
   switch (aqi) {
@@ -24,7 +35,6 @@ const healthAdvice = computed(() => {
         mask: '마스크 미착용 가능',
         ventilation: '실내 환기 적극 추천',
         outdoor: '야외 활동 및 조깅 최적',
-        badgeType: 'success',
       }
     case 2:
       return {
@@ -32,7 +42,6 @@ const healthAdvice = computed(() => {
         mask: '마스크 필요 없음',
         ventilation: '자유로운 환기 가능',
         outdoor: '일상적인 야외 활동 가능',
-        badgeType: 'primary',
       }
     case 3:
       return {
@@ -40,7 +49,6 @@ const healthAdvice = computed(() => {
         mask: '호흡기 질환자 마스크 지참',
         ventilation: '짧은 시간 환기 권장',
         outdoor: '격렬한 야외 운동 자제',
-        badgeType: 'warning',
       }
     case 4:
       return {
@@ -48,7 +56,6 @@ const healthAdvice = computed(() => {
         mask: 'KF94/80 마스크 필수 착용',
         ventilation: '실내 환기 자제',
         outdoor: '야외 활동 최소화',
-        badgeType: 'warning',
       }
     case 5:
     default:
@@ -57,7 +64,6 @@ const healthAdvice = computed(() => {
         mask: '보건용 마스크 반드시 착용',
         ventilation: '창문 닫기 및 공기청정기 가동',
         outdoor: '외출 금지 및 실내 상주',
-        badgeType: 'danger',
       }
   }
 })
@@ -75,10 +81,10 @@ watch(selectedCityKey, (newKey) => {
   <div class="toss-air-container">
     <div class="page-title-box">
       <h2 class="page-title">대기질 분석</h2>
-      <p class="page-desc">통합 대기 오염 지수(AQI) 및 미세먼지 성분 농도입니다.</p>
+      <p class="page-desc">전국 14개 주요 도시의 통합 대기 오염 지수(AQI) 및 미세먼지 측정 데이터입니다.</p>
     </div>
 
-    <!-- 공통 도시 선택 컴포넌트 -->
+    <!-- 14개 도시 선택 컴포넌트 -->
     <CitySelector
       v-model="selectedCityKey"
       :options="cityOptions"
@@ -103,7 +109,7 @@ watch(selectedCityKey, (newKey) => {
 
             <div class="aqi-badge-wrap">
               <span class="toss-badge">
-                {{ getAqiStatus(airData.aqi).label.replace(/[🟢🔵🟡🟠🔴]/g, '').trim() }}
+                {{ getAqiStatus(airData.aqi).label }}
               </span>
               <span class="aqi-score">지수 레벨 {{ airData.aqi }} / 5</span>
             </div>
@@ -119,7 +125,7 @@ watch(selectedCityKey, (newKey) => {
           </div>
         </div>
 
-        <!-- 실생활 행동 수칙 가이드 카드 (UX 가치 대폭 향상) -->
+        <!-- 실생활 행동 수칙 가이드 카드 -->
         <div class="health-guide-card">
           <div class="guide-header">
             <SvgIcon name="sparkles" size="18" color="#3182f6" />
@@ -241,7 +247,6 @@ watch(selectedCityKey, (newKey) => {
   font-weight: 600;
 }
 
-/* 실생활 행동 가이드 카드 */
 .health-guide-card {
   background: var(--toss-canvas);
   border: 1px solid var(--toss-border);

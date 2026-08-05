@@ -15,11 +15,22 @@ const { isLoading, errorMessage, fetchCityDetail, formatTemperature } = useWeath
 
 const currentCityId = computed(() => route.params?.cityId ?? 'city_01')
 
-// 다른 관측소 바로 보기 옵션
+// 대한민국 14개 주요 도시 관측소 바로가기 옵션
 const stationOptions = [
-  { label: '서울 관측소', value: 'city_01' },
-  { label: '수원 관측소', value: 'city_02' },
-  { label: '부산 관측소', value: 'city_03' },
+  { label: '서울', value: 'city_01' },
+  { label: '수원', value: 'city_02' },
+  { label: '부산', value: 'city_03' },
+  { label: '인천', value: 'city_04' },
+  { label: '대구', value: 'city_05' },
+  { label: '대전', value: 'city_06' },
+  { label: '광주', value: 'city_07' },
+  { label: '울산', value: 'city_08' },
+  { label: '제주', value: 'city_09' },
+  { label: '춘천', value: 'city_10' },
+  { label: '강릉', value: 'city_11' },
+  { label: '전주', value: 'city_12' },
+  { label: '청주', value: 'city_13' },
+  { label: '창원', value: 'city_14' },
 ]
 
 const loadDetailData = async () => {
@@ -48,12 +59,12 @@ const displayFeelsLike = computed(() => formatTemperature(cityData.value?.feelsL
   <div class="toss-detail-container">
     <div class="page-title-box">
       <h2 class="page-title">관측소 상세 정보</h2>
-      <p class="page-desc">해당 지역의 상세 기상 분석 결과입니다.</p>
+      <p class="page-desc">해당 관측 지역의 실시간 상세 기상 분석 결과입니다.</p>
     </div>
 
-    <!-- 퀵 관측소 전환 바 (메인 이동 없이 1초 만에 전환) -->
+    <!-- 14개 관측소 퀵 전환 바 -->
     <div class="quick-station-bar">
-      <span class="bar-label">관측소 바로가기</span>
+      <span class="bar-label">관측소 선택:</span>
       <div class="station-chips">
         <button
           v-for="st in stationOptions"
@@ -176,7 +187,6 @@ const displayFeelsLike = computed(() => formatTemperature(cityData.value?.feelsL
   color: var(--toss-muted);
 }
 
-/* 퀵 관측소 전환 바 */
 .quick-station-bar {
   display: flex;
   align-items: center;
@@ -185,12 +195,14 @@ const displayFeelsLike = computed(() => formatTemperature(cityData.value?.feelsL
   border: 1px solid var(--toss-border);
   border-radius: 14px;
   padding: 10px 16px;
+  overflow-x: auto;
 }
 
 .bar-label {
   font-size: 13px;
   font-weight: 600;
   color: var(--toss-body);
+  white-space: nowrap;
 }
 
 .station-chips {
@@ -207,6 +219,7 @@ const displayFeelsLike = computed(() => formatTemperature(cityData.value?.feelsL
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
   transition: all 0.15s ease;
 }
 

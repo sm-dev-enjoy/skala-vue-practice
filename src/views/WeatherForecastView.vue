@@ -15,19 +15,29 @@ const { formatTemperature } = useWeatherApi()
 
 const selectedDateFilter = ref('all')
 
+// 대한민국 14개 주요 도시 셀렉터 옵션
 const cityOptions = [
   { label: '서울', value: 'Seoul' },
-  { label: '수원', value: 'Suwon' },
   { label: '부산', value: 'Busan' },
+  { label: '인천', value: 'Incheon' },
+  { label: '대구', value: 'Daegu' },
+  { label: '대전', value: 'Daejeon' },
+  { label: '광주', value: 'Gwangju' },
+  { label: '울산', value: 'Ulsan' },
+  { label: '수원', value: 'Suwon' },
+  { label: '제주', value: 'Jeju-si' },
+  { label: '춘천', value: 'Chuncheon' },
+  { label: '강릉', value: 'Gangneung' },
+  { label: '전주', value: 'Jeonju' },
+  { label: '청주', value: 'Cheongju' },
+  { label: '창원', value: 'Changwon' },
 ]
 
-// 추출된 예보 날짜 필터링
 const filteredForecastList = computed(() => {
   if (selectedDateFilter.value === 'all') return forecastList.value
   return forecastList.value.filter((item) => item.time.startsWith(selectedDateFilter.value))
 })
 
-// 5일간의 전체 날짜 목록 구하기 (중복 제거)
 const availableDates = computed(() => {
   const dates = new Set()
   forecastList.value.forEach((item) => {
@@ -37,7 +47,6 @@ const availableDates = computed(() => {
   return Array.from(dates)
 })
 
-// 날짜 텍스트(예: "2026-08-05")를 읽기 쉬운 라벨(예: "8/5")로 포맷팅하는 헬퍼
 const formatDateLabel = (dateStr) => {
   if (!dateStr || dateStr === 'all') return '전체'
   const parts = dateStr.split('-')
@@ -49,7 +58,6 @@ const formatDateLabel = (dateStr) => {
   return dateStr
 }
 
-// 시간 문자열 (예: "2026-08-05 15:00:00")에서 시간(예: "15:00")만 가독성 있게 추출
 const formatTimeOnly = (dtTxt) => {
   if (!dtTxt) return ''
   const parts = dtTxt.split(' ')
@@ -107,17 +115,17 @@ watch(selectedCity, (newCity) => {
   <div class="toss-forecast-container">
     <div class="page-title-box">
       <h2 class="page-title">5일 기상 예보</h2>
-      <p class="page-desc">OpenWeather API 기반 5일간(3시간 단위)의 단기 기상 예측 데이터입니다.</p>
+      <p class="page-desc">OpenWeather API 기반 전국 14개 도시의 5일간 단기 기상 예측 데이터입니다.</p>
     </div>
 
-    <!-- 관측 지역 선택 -->
+    <!-- 관측 지역 선택 (14개 도시) -->
     <CitySelector
       v-model="selectedCity"
       :options="cityOptions"
       label="관측 지역"
     />
 
-    <!-- 날짜별 필터 탭 (5일치 40개 전체 날짜 동적 바인딩) -->
+    <!-- 날짜별 필터 탭 -->
     <div v-if="availableDates.length > 0" class="date-filter-bar">
       <span class="filter-label">예보 날짜 선택:</span>
       <div class="date-chips">
@@ -156,7 +164,6 @@ watch(selectedCity, (newCity) => {
           <div class="item-left">
             <span class="time-text">{{ formatTimeOnly(item.time) }}</span>
 
-            <!-- 날씨 상태 뱃지 칩 -->
             <div
               class="weather-state-chip"
               :style="{
@@ -225,7 +232,6 @@ watch(selectedCity, (newCity) => {
   color: var(--toss-muted);
 }
 
-/* 날짜 필터 바 */
 .date-filter-bar {
   display: flex;
   align-items: center;
