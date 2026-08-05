@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useConfigStore } from '@/stores/configStore'
 import { useForecast } from '@/composables/useForecast'
 import { useWeatherApi } from '@/composables/useWeatherApi'
@@ -13,15 +13,30 @@ const selectedCity = ref('Seoul')
 const { isLoading, errorMessage, forecastList, fetchForecast } = useForecast()
 const { formatTemperature } = useWeatherApi()
 
+const selectedDateFilter = ref('all')
+
 const cityOptions = [
   { label: '서울', value: 'Seoul' },
   { label: '수원', value: 'Suwon' },
   { label: '부산', value: 'Busan' },
 ]
 
-/**
- * 날씨 상태(맑음, 비, 구름 등)에 따라 직관적인 시각적 뱃지 테마와 SVG 아이콘을 반환하는 유틸리티
- */
+// 추출된 예보 날짜 추출 및 필터링
+const filteredForecastList = computed(() => {
+  if (selectedDateFilter.value === 'all') return forecastList.value
+  return forecastList.value.filter((item) => item.time.startsWith(selectedDateFilter.value))
+})
+
+// 예보 목록에 포함된 날짜목록 구하기 (중복 제거)
+const availableDates = computed(() => {
+  const dates = new Set()
+  forecastList.value.forEach((item) => {
+    const datePart = item.time.split(' ')[0]
+    if (datePart) dates.add(datePart)
+  })
+  return Array.from(dates)
+})
+
 const getWeatherStateTheme = (description) => {
   const desc = description ?? ''
   
@@ -45,7 +60,6 @@ const getWeatherStateTheme = (description) => {
       iconColor: '#0284c7',
     }
   }
-  // 구름 / 흐림 및 기타
   return {
     label: desc,
     icon: 'cloud',
@@ -61,6 +75,7 @@ onMounted(() => {
 })
 
 watch(selectedCity, (newCity) => {
+  selectedDateFilter.value = 'all'
   fetchForecast(newCity)
 })
 </script>
@@ -72,12 +87,35 @@ watch(selectedCity, (newCity) => {
       <p class="page-desc">3시간 단위의 단기 기상 예측 데이터입니다.</p>
     </div>
 
-    <!-- 공통 도시 선택 컴포넌트 -->
+    <!-- 관측 지역 선택 -->
     <CitySelector
       v-model="selectedCity"
       :options="cityOptions"
       label="관측 지역"
     />
+
+    <!-- 날짜별 필터 탭 (날짜 탐색 UX 대폭 향상) -->
+    <div v-if="availableDates.length > 0" class="date-filter-bar">
+      <span class="filter-label">날짜 선택:</span>
+      <div class="date-chips">
+        <button
+          class="date-chip"
+          :class="{ active: selectedDateFilter === 'all' }"
+          @click="selectedDateFilter = 'all'"
+        >
+          전체
+        </button>
+        <button
+          v-for="d in availableDates"
+          :key="d"
+          class="date-chip"
+          :class="{ active: selectedDateFilter === d }"
+          @click="selectedDateFilter = d"
+        >
+          {{ d }}
+        </button>
+      </div>
+    </div>
 
     <div v-if="isLoading" class="skeleton-box">
       <el-skeleton :rows="6" animated />
@@ -86,9 +124,9 @@ watch(selectedCity, (newCity) => {
     <template v-else>
       <StatusAlert :message="errorMessage" type="error" />
 
-      <div v-if="forecastList.length > 0" class="forecast-list">
+      <div v-if="filteredForecastList.length > 0" class="forecast-list">
         <div
-          v-for="(item, index) in forecastList"
+          v-for="(item, index) in filteredForecastList"
           :key="index"
           class="toss-forecast-card"
         >
@@ -130,6 +168,12 @@ watch(selectedCity, (newCity) => {
           </div>
         </div>
       </div>
+
+      <el-empty
+        v-else-if="!errorMessage"
+        description="해당 날짜의 예보 정보가 없습니다."
+        :image-size="80"
+      />
     </template>
   </div>
 </template>
@@ -142,7 +186,7 @@ watch(selectedCity, (newCity) => {
 }
 
 .page-title-box {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .page-title {
@@ -156,6 +200,48 @@ watch(selectedCity, (newCity) => {
   margin: 0;
   font-size: 14px;
   color: var(--toss-muted);
+}
+
+/* 날짜 필터 바 */
+.date-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--toss-canvas);
+  border: 1px solid var(--toss-border);
+  border-radius: 14px;
+  padding: 10px 16px;
+  overflow-x: auto;
+}
+
+.filter-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--toss-body);
+  white-space: nowrap;
+}
+
+.date-chips {
+  display: flex;
+  gap: 8px;
+}
+
+.date-chip {
+  background: var(--toss-surface);
+  color: var(--toss-body);
+  border: none;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.date-chip.active {
+  background: var(--toss-weak-bg);
+  color: var(--toss-weak-fg);
 }
 
 .forecast-list {
@@ -193,7 +279,6 @@ watch(selectedCity, (newCity) => {
   color: var(--toss-muted);
 }
 
-/* 상태별 직관적 뱃지 칩 */
 .weather-state-chip {
   display: inline-flex;
   align-items: center;

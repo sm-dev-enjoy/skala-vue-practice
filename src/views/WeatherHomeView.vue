@@ -18,7 +18,6 @@ const { weatherList, searchQuery, selectedCityInfo, filteredWeatherList, updateQ
 
 const { isLoading, errorMessage, fetchRealTimeWeatherList, formatTemperature } = useWeatherApi()
 
-// 메인 Hero 배너 선택 인덱스
 const selectedHeroIndex = ref(0)
 
 const heroCity = computed(() => {
@@ -28,7 +27,6 @@ const heroCity = computed(() => {
 
 const heroTemp = computed(() => formatTemperature(heroCity.value?.temp))
 
-// Hero 배너 날씨 동적 SVG 아이콘 계산 (해 모양 고정 버그 수정)
 const heroWeatherIcon = computed(() => {
   const status = heroCity.value?.status ?? ''
   if (status.includes('맑음') || status.includes('Clear') || status.includes('Sun')) return 'sun'
@@ -75,6 +73,10 @@ const handleSelectHeroCity = (index, name) => {
   selectCity(`${name} 관측소가 메인 하이라이트에 선택되었습니다.`)
 }
 
+const handleQuickSearchKeyword = (keyword) => {
+  updateQuery(keyword)
+}
+
 const handleDetailJump = (cityId) => {
   router.push(`/weather/${cityId}`)
 }
@@ -105,7 +107,6 @@ const handleDetailJump = (cityId) => {
           <p class="status-title">{{ heroCity.status }}</p>
         </div>
 
-        <!-- 동적 날씨 SVG 아이콘 바인딩 (해 고정 버그 완벽 수정) -->
         <div class="hero-right-visual">
           <SvgIcon :name="heroWeatherIcon" size="48" color="#3182f6" />
           <div class="hero-temp-group">
@@ -132,20 +133,33 @@ const handleDetailJump = (cityId) => {
       </div>
     </div>
 
-    <!-- Search Input Bar -->
-    <div class="toss-search-box">
-      <el-input
-        v-model="searchQuery"
-        placeholder="검색할 도시명을 입력하세요 (예: 서울, 수원, 부산)"
-        clearable
-        size="large"
-        class="toss-input"
-        @input="updateQuery"
-      >
-        <template #prefix>
-          <el-icon><i-ep-search /></el-icon>
-        </template>
-      </el-input>
+    <!-- Search Input Box & Quick Keywords -->
+    <div class="toss-search-wrapper">
+      <div class="toss-search-box">
+        <el-input
+          v-model="searchQuery"
+          placeholder="검색할 도시명을 입력하세요 (예: 서울, 수원, 부산)"
+          clearable
+          size="large"
+          class="toss-input"
+          @input="updateQuery"
+        >
+          <template #prefix>
+            <el-icon><i-ep-search /></el-icon>
+          </template>
+        </el-input>
+      </div>
+
+      <!-- 퀵 필터 키워드 칩 -->
+      <div class="quick-keywords-row">
+        <span class="kw-label">인기 검색어:</span>
+        <div class="kw-chips">
+          <button class="kw-btn" @click="handleQuickSearchKeyword('')">전체</button>
+          <button class="kw-btn" @click="handleQuickSearchKeyword('서울')">서울</button>
+          <button class="kw-btn" @click="handleQuickSearchKeyword('수원')">수원</button>
+          <button class="kw-btn" @click="handleQuickSearchKeyword('부산')">부산</button>
+        </div>
+      </div>
     </div>
 
     <!-- Weather Cards Section -->
@@ -330,7 +344,13 @@ const handleDetailJump = (cityId) => {
   color: var(--toss-weak-fg);
 }
 
-/* Search Box */
+/* Search Wrapper & Keywords */
+.toss-search-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .toss-search-box :deep(.el-input__wrapper) {
   border-radius: 14px !important;
   box-shadow: none !important;
@@ -340,6 +360,41 @@ const handleDetailJump = (cityId) => {
 
 .toss-search-box :deep(.el-input__wrapper.is-focus) {
   border-color: var(--toss-blue) !important;
+}
+
+.quick-keywords-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px;
+}
+
+.kw-label {
+  font-size: 13px;
+  color: var(--toss-muted);
+  font-weight: 600;
+}
+
+.kw-chips {
+  display: flex;
+  gap: 6px;
+}
+
+.kw-btn {
+  background: var(--toss-canvas);
+  border: 1px solid var(--toss-border);
+  color: var(--toss-body);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.kw-btn:hover {
+  border-color: var(--toss-blue);
+  color: var(--toss-blue);
 }
 
 /* Cards Section */

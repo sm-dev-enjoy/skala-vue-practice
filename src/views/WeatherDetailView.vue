@@ -13,18 +13,32 @@ const configStore = useConfigStore()
 const cityData = ref(null)
 const { isLoading, errorMessage, fetchCityDetail, formatTemperature } = useWeatherApi()
 
+const currentCityId = computed(() => route.params?.cityId ?? 'city_01')
+
+// 다른 관측소 바로 보기 옵션
+const stationOptions = [
+  { label: '서울 관측소', value: 'city_01' },
+  { label: '수원 관측소', value: 'city_02' },
+  { label: '부산 관측소', value: 'city_03' },
+]
+
 const loadDetailData = async () => {
-  const cityId = route.params?.cityId
-  cityData.value = await fetchCityDetail(cityId)
+  cityData.value = await fetchCityDetail(currentCityId.value)
 }
 
 watch(
-  () => route.params?.cityId,
+  currentCityId,
   () => {
     loadDetailData()
   },
   { immediate: true },
 )
+
+const handleSwitchStation = (targetId) => {
+  if (targetId !== currentCityId.value) {
+    router.push(`/weather/${targetId}`)
+  }
+}
 
 const displayTemp = computed(() => formatTemperature(cityData.value?.temp))
 const displayFeelsLike = computed(() => formatTemperature(cityData.value?.feelsLike))
@@ -35,6 +49,22 @@ const displayFeelsLike = computed(() => formatTemperature(cityData.value?.feelsL
     <div class="page-title-box">
       <h2 class="page-title">관측소 상세 정보</h2>
       <p class="page-desc">해당 지역의 상세 기상 분석 결과입니다.</p>
+    </div>
+
+    <!-- 퀵 관측소 전환 바 (메인 이동 없이 1초 만에 전환) -->
+    <div class="quick-station-bar">
+      <span class="bar-label">관측소 바로가기</span>
+      <div class="station-chips">
+        <button
+          v-for="st in stationOptions"
+          :key="st.value"
+          class="st-chip"
+          :class="{ active: currentCityId === st.value }"
+          @click="handleSwitchStation(st.value)"
+        >
+          {{ st.label }}
+        </button>
+      </div>
     </div>
 
     <div v-if="isLoading" class="skeleton-box">
@@ -130,7 +160,7 @@ const displayFeelsLike = computed(() => formatTemperature(cityData.value?.feelsL
 }
 
 .page-title-box {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .page-title {
@@ -144,6 +174,45 @@ const displayFeelsLike = computed(() => formatTemperature(cityData.value?.feelsL
   margin: 0;
   font-size: 14px;
   color: var(--toss-muted);
+}
+
+/* 퀵 관측소 전환 바 */
+.quick-station-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--toss-canvas);
+  border: 1px solid var(--toss-border);
+  border-radius: 14px;
+  padding: 10px 16px;
+}
+
+.bar-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--toss-body);
+}
+
+.station-chips {
+  display: flex;
+  gap: 8px;
+}
+
+.st-chip {
+  background: var(--toss-surface);
+  color: var(--toss-body);
+  border: none;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.st-chip.active {
+  background: var(--toss-weak-bg);
+  color: var(--toss-weak-fg);
 }
 
 .banner-card {

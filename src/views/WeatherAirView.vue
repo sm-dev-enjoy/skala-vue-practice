@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useAirPollution } from '@/composables/useAirPollution'
 import CitySelector from '../components/common/CitySelector.vue'
 import StatusAlert from '../components/common/StatusAlert.vue'
@@ -13,6 +13,54 @@ const cityOptions = [
   { label: '수원', value: 'suwon' },
   { label: '부산', value: 'busan' },
 ]
+
+// AQI 레벨별 실생활 행동 가이드 팁
+const healthAdvice = computed(() => {
+  const aqi = airData.value?.aqi ?? 1
+  switch (aqi) {
+    case 1:
+      return {
+        title: '대기 환경이 매우 쾌적합니다',
+        mask: '마스크 미착용 가능',
+        ventilation: '실내 환기 적극 추천',
+        outdoor: '야외 활동 및 조깅 최적',
+        badgeType: 'success',
+      }
+    case 2:
+      return {
+        title: '대기 상태가 무난하고 양호합니다',
+        mask: '마스크 필요 없음',
+        ventilation: '자유로운 환기 가능',
+        outdoor: '일상적인 야외 활동 가능',
+        badgeType: 'primary',
+      }
+    case 3:
+      return {
+        title: '민감군의 경우 주의가 필요합니다',
+        mask: '호흡기 질환자 마스크 지참',
+        ventilation: '짧은 시간 환기 권장',
+        outdoor: '격렬한 야외 운동 자제',
+        badgeType: 'warning',
+      }
+    case 4:
+      return {
+        title: '대기 오염도가 높아 유의해야 합니다',
+        mask: 'KF94/80 마스크 필수 착용',
+        ventilation: '실내 환기 자제',
+        outdoor: '야외 활동 최소화',
+        badgeType: 'warning',
+      }
+    case 5:
+    default:
+      return {
+        title: '대기 환경이 매우 나쁨 수준입니다',
+        mask: '보건용 마스크 반드시 착용',
+        ventilation: '창문 닫기 및 공기청정기 가동',
+        outdoor: '외출 금지 및 실내 상주',
+        badgeType: 'danger',
+      }
+  }
+})
 
 onMounted(() => {
   fetchAirPollution(selectedCityKey.value)
@@ -71,6 +119,30 @@ watch(selectedCityKey, (newKey) => {
           </div>
         </div>
 
+        <!-- 실생활 행동 수칙 가이드 카드 (UX 가치 대폭 향상) -->
+        <div class="health-guide-card">
+          <div class="guide-header">
+            <SvgIcon name="sparkles" size="18" color="#3182f6" />
+            <h4>오늘의 실생활 맞춤 행동 가이드</h4>
+          </div>
+          <p class="guide-summary-title">{{ healthAdvice.title }}</p>
+
+          <div class="guide-items-grid">
+            <div class="g-item">
+              <span class="g-label">마스크 착용</span>
+              <span class="g-val">{{ healthAdvice.mask }}</span>
+            </div>
+            <div class="g-item">
+              <span class="g-label">실내 환기</span>
+              <span class="g-val">{{ healthAdvice.ventilation }}</span>
+            </div>
+            <div class="g-item">
+              <span class="g-label">야외 활동</span>
+              <span class="g-val">{{ healthAdvice.outdoor }}</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Air Pollutants Grid Cards -->
         <div class="air-grid">
           <div class="air-item-card highlighted">
@@ -117,7 +189,7 @@ watch(selectedCityKey, (newKey) => {
 }
 
 .page-title-box {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .page-title {
@@ -167,6 +239,63 @@ watch(selectedCityKey, (newKey) => {
   font-size: 14px;
   color: var(--toss-muted);
   font-weight: 600;
+}
+
+/* 실생활 행동 가이드 카드 */
+.health-guide-card {
+  background: var(--toss-canvas);
+  border: 1px solid var(--toss-border);
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
+.guide-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.guide-header h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--toss-foreground);
+}
+
+.guide-summary-title {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--toss-blue);
+}
+
+.guide-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.g-item {
+  background: var(--toss-surface);
+  padding: 12px 14px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.g-label {
+  font-size: 12px;
+  color: var(--toss-muted);
+  font-weight: 600;
+}
+
+.g-val {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--toss-foreground);
 }
 
 .air-grid {
