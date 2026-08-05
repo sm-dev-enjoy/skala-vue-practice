@@ -9,58 +9,76 @@ const handleGoHome = () => {
 </script>
 
 <template>
-  <div>
-    <h3>ℹ️ 서비스 소개</h3>
-    <hr />
+  <el-card class="about-card" shadow="never">
+    <template #header>
+      <div class="about-header">
+        <h3>ℹ️ 서비스 및 시스템 기술 아키텍처</h3>
+        <el-tag type="info" size="small">Vue 3 + Vite</el-tag>
+      </div>
+    </template>
 
-    <div class="description-box">
-      <p>본 앱은 <strong>Vue 3</strong> 및 <strong>Vue Router 4</strong> 기반 제작된 실습용 기상 관측 대시보드 시스템입니다.</p>
-      <ul>
-        <li><code>components/exercise/</code> 폴더 내부의 독립 부품 연동</li>
-        <li>클라이언트 사이드 라우팅을 통한 새로고침 없는 화면 전환</li>
-        <li>URL 쿼리 스트링 매핑을 활용한 실시간 검색 상태 동기화</li>
-      </ul>
+    <div class="about-intro">
+      <p>
+        본 애플리케이션은 <strong>Vue 3 Composition API</strong> 및 <strong>OpenWeatherMap REST API</strong>를 기반으로 구축된 기상 관측 및 통합 대기 환경 분석 시스템입니다.
+      </p>
     </div>
 
-    <button @click="handleGoHome" class="home-btn">대시보드 홈으로 이동</button>
-  </div>
+    <el-divider content-position="left">핵심 기술 구현 포인트</el-divider>
+
+    <el-timeline style="padding-left: 8px">
+      <el-timeline-item timestamp="UI & Design System" placement="top" type="primary">
+        <el-card shadow="hover">
+          <h4>Element Plus & Design System</h4>
+          <p>Vanilla CSS 기반 토큰과 Element Plus 컴포넌트를 조화시켜 직관적이고 반응성 높은 인터페이스를 구성했습니다.</p>
+        </el-card>
+      </el-timeline-item>
+
+      <el-timeline-item timestamp="State & Routing" placement="top" type="success">
+        <el-card shadow="hover">
+          <h4>Pinia & Vue Router 4</h4>
+          <p>전역 온도 단위(섭씨/화씨) 상태 관리 및 URL 쿼리 파라미터 기반의 동적 필터링을 완벽하게 동기화했습니다.</p>
+        </el-card>
+      </el-timeline-item>
+
+      <el-timeline-item timestamp="Modern JS (ES6+)" placement="top" type="warning">
+        <el-card shadow="hover">
+          <h4>Modern JavaScript 문법 적용</h4>
+          <p>Destructuring(구조분해 할당), Spread operator(전개 연산자), Optional chaining(?.), Nullish coalescing(??) 등의 문법을 적극 적용하여 안전하고 가독성 높은 코드를 작성했습니다.</p>
+        </el-card>
+      </el-timeline-item>
+    </el-timeline>
+
+    <div class="action-footer">
+      <el-button type="primary" size="large" style="width: 100%" @click="handleGoHome">
+        대시보드 홈으로 이동
+      </el-button>
+    </div>
+  </el-card>
 </template>
 
 <style scoped>
-.description-box {
-  background-color: #f8f9fa;
-  padding: 12px;
-  border-radius: 6px;
-  line-height: 1.5;
-  font-size: 14px;
+.about-card {
+  border-radius: 8px;
 }
 
-ul {
-  padding-left: 20px;
-  margin: 8px 0 0 0;
+.about-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-li {
-  margin-bottom: 6px;
-  color: #555;
+.about-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
 }
 
-code {
-  background-color: #ffeaa7;
-  padding: 2px 4px;
-  border-radius: 4px;
-  color: #d63031;
+.about-intro {
+  color: #475569;
+  line-height: 1.6;
+  font-size: 0.95rem;
 }
 
-.home-btn {
-  width: 100%;
-  margin-top: 15px;
-  padding: 10px;
-  background-color: #3498db;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-weight: bold;
-  cursor: pointer;
+.action-footer {
+  margin-top: 24px;
 }
 </style>

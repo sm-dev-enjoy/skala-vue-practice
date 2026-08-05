@@ -1,14 +1,21 @@
 <script setup>
 import { useConfigStore } from '@/stores/configStore'
+
+// Pinia 전역 스토어에서 온습도 단위(섭씨/화씨) 상태를 가져옵니다.
 const configStore = useConfigStore()
 </script>
 
 <template>
   <div class="unit-toggler">
-    <span
-      >날씨단위: <strong>{{ configStore.unitSymbol }}</strong></span
+    <span class="unit-label">온도 단위</span>
+    <el-radio-group
+      v-model="configStore.unit"
+      size="small"
+      class="custom-radio-group"
     >
-    <button @click="configStore.toggleUnit()" class="toggle-btn">단위변경</button>
+      <el-radio-button value="celsius">°C 섭씨</el-radio-button>
+      <el-radio-button value="fahrenheit">°F 화씨</el-radio-button>
+    </el-radio-group>
   </div>
 </template>
 
@@ -17,17 +24,16 @@ const configStore = useConfigStore()
   margin-left: auto;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  white-space: nowrap;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 4px 12px;
+  border-radius: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
-.toggle-btn {
-  padding: 6px 10px;
-  background-color: #4b6584;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
+.unit-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
 }
 </style>
