@@ -14,13 +14,15 @@ export function useForecast() {
     errorMessage.value = ''
 
     try {
+      // 5일간 3시간 단위 (총 40개 데이터) 전체 수신
       const response = await axios.get(
         `${FORECAST_URL}?q=${cityName}&appid=${API_KEY}&units=metric&lang=kr`,
       )
 
       const { list } = response?.data ?? {}
-      
-      forecastList.value = (list ?? []).slice(0, 12).map((item) => {
+
+      // .slice 제한을 완전히 제거하여 API가 제공하는 5일치 40개 예보 항목을 모두 저장
+      forecastList.value = (list ?? []).map((item) => {
         const { dt_txt, main, weather, wind } = item ?? {}
         const [firstWeather] = weather ?? []
         return {

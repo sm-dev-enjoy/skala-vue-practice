@@ -21,13 +21,13 @@ const cityOptions = [
   { label: '부산', value: 'Busan' },
 ]
 
-// 추출된 예보 날짜 추출 및 필터링
+// 추출된 예보 날짜 필터링
 const filteredForecastList = computed(() => {
   if (selectedDateFilter.value === 'all') return forecastList.value
   return forecastList.value.filter((item) => item.time.startsWith(selectedDateFilter.value))
 })
 
-// 예보 목록에 포함된 날짜목록 구하기 (중복 제거)
+// 5일간의 전체 날짜 목록 구하기 (중복 제거)
 const availableDates = computed(() => {
   const dates = new Set()
   forecastList.value.forEach((item) => {
@@ -36,6 +36,29 @@ const availableDates = computed(() => {
   })
   return Array.from(dates)
 })
+
+// 날짜 텍스트(예: "2026-08-05")를 읽기 쉬운 라벨(예: "8/5")로 포맷팅하는 헬퍼
+const formatDateLabel = (dateStr) => {
+  if (!dateStr || dateStr === 'all') return '전체'
+  const parts = dateStr.split('-')
+  if (parts.length === 3) {
+    const month = parseInt(parts[1], 10)
+    const day = parseInt(parts[2], 10)
+    return `${month}/${day}`
+  }
+  return dateStr
+}
+
+// 시간 문자열 (예: "2026-08-05 15:00:00")에서 시간(예: "15:00")만 가독성 있게 추출
+const formatTimeOnly = (dtTxt) => {
+  if (!dtTxt) return ''
+  const parts = dtTxt.split(' ')
+  if (parts.length >= 2) {
+    const timePart = parts[1].substring(0, 5)
+    return `${parts[0].substring(5)} ${timePart}`
+  }
+  return dtTxt
+}
 
 const getWeatherStateTheme = (description) => {
   const desc = description ?? ''
@@ -84,7 +107,7 @@ watch(selectedCity, (newCity) => {
   <div class="toss-forecast-container">
     <div class="page-title-box">
       <h2 class="page-title">5일 기상 예보</h2>
-      <p class="page-desc">3시간 단위의 단기 기상 예측 데이터입니다.</p>
+      <p class="page-desc">OpenWeather API 기반 5일간(3시간 단위)의 단기 기상 예측 데이터입니다.</p>
     </div>
 
     <!-- 관측 지역 선택 -->
@@ -94,16 +117,16 @@ watch(selectedCity, (newCity) => {
       label="관측 지역"
     />
 
-    <!-- 날짜별 필터 탭 (날짜 탐색 UX 대폭 향상) -->
+    <!-- 날짜별 필터 탭 (5일치 40개 전체 날짜 동적 바인딩) -->
     <div v-if="availableDates.length > 0" class="date-filter-bar">
-      <span class="filter-label">날짜 선택:</span>
+      <span class="filter-label">예보 날짜 선택:</span>
       <div class="date-chips">
         <button
           class="date-chip"
           :class="{ active: selectedDateFilter === 'all' }"
           @click="selectedDateFilter = 'all'"
         >
-          전체
+          전체 (5일)
         </button>
         <button
           v-for="d in availableDates"
@@ -112,7 +135,7 @@ watch(selectedCity, (newCity) => {
           :class="{ active: selectedDateFilter === d }"
           @click="selectedDateFilter = d"
         >
-          {{ d }}
+          {{ formatDateLabel(d) }}
         </button>
       </div>
     </div>
@@ -131,9 +154,9 @@ watch(selectedCity, (newCity) => {
           class="toss-forecast-card"
         >
           <div class="item-left">
-            <span class="time-text">{{ item.time }}</span>
+            <span class="time-text">{{ formatTimeOnly(item.time) }}</span>
 
-            <!-- 직관적인 날씨 상태 뱃지 칩 -->
+            <!-- 날씨 상태 뱃지 칩 -->
             <div
               class="weather-state-chip"
               :style="{
