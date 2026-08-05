@@ -20,7 +20,7 @@ export function useWeatherApi() {
     city_06: { english: 'Daejeon', name: '대전', korean: '대전광역시', coords: '36.3510, 127.3850' },
     city_07: { english: 'Gwangju', name: '광주', korean: '광주광역시', coords: '35.1595, 126.8526' },
     city_08: { english: 'Ulsan', name: '울산', korean: '울산광역시', coords: '35.5384, 129.3114' },
-    city_09: { english: 'Jeju-si', name: '제주', korean: '제주특별자치도 제주시', coords: '33.4996, 126.5312' },
+    city_09: { english: 'Jeju', name: '제주', korean: '제주특별자치도 제주시', coords: '33.4996, 126.5312' },
     city_10: { english: 'Chuncheon', name: '춘천', korean: '강원특별자치도 춘천시', coords: '37.8813, 127.7298' },
     city_11: { english: 'Gangneung', name: '강릉', korean: '강원특별자치도 강릉시', coords: '37.7519, 128.8761' },
     city_12: { english: 'Jeonju', name: '전주', korean: '전북특별자치도 전주시', coords: '35.8242, 127.1480' },
@@ -37,7 +37,7 @@ export function useWeatherApi() {
   }
 
   /**
-   * 대한민국 전국 14개 주요 도시 실시간 날씨 데이터 병렬 조회
+   * 대한민국 전국 14개 주요 도시 실시간 날씨 데이터 안정적 병렬 조회 (Promise.allSettled 기반)
    */
   const fetchRealTimeWeatherList = async () => {
     isLoading.value = true
@@ -49,22 +49,35 @@ export function useWeatherApi() {
         axios.get(`${BASE_URL}?q=${cityMapping[key].english}&appid=${API_KEY}&units=metric&lang=kr`),
       )
 
-      const responses = await Promise.all(requests)
+      // 개별 실패 시 전체 붕괴를 막는 Promise.allSettled 적용
+      const results = await Promise.allSettled(requests)
 
-      return responses.map((res, index) => {
+      const weatherList = []
+      results.forEach((result, index) => {
         const key = cityKeys[index]
         const cityInfo = cityMapping[key]
-        const { main, weather } = res?.data ?? {}
-        const [firstWeather] = weather ?? []
-        return {
-          id: key,
-          name: cityInfo.name,
-          fullName: cityInfo.korean,
-          englishName: cityInfo.english,
-          temp: main?.temp ?? 0,
-          status: firstWeather?.description ?? '정보 없음',
+
+        if (result.status === 'fulfilled') {
+          const { main, weather } = result.value?.data ?? {}
+          const [firstWeather] = weather ?? []
+          weatherList.push({
+            id: key,
+            name: cityInfo.name,
+            fullName: cityInfo.korean,
+            englishName: cityInfo.english,
+            temp: main?.temp ?? 0,
+            status: firstWeather?.description ?? '정보 없음',
+          })
+        } else {
+          console.warn(`[관측소 데이터 예외] ${cityInfo.name} (${cityInfo.english}) 수신 실패:`, result.reason)
         }
       })
+
+      if (weatherList.length === 0) {
+        errorMessage.value = '실시간 날씨 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'
+      }
+
+      return weatherList
     } catch (error) {
       console.error('전국 날씨 데이터 조회 오류:', error)
       errorMessage.value = '실시간 날씨 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'

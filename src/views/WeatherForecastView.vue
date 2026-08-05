@@ -15,7 +15,7 @@ const { formatTemperature } = useWeatherApi()
 
 const selectedDateFilter = ref('all')
 
-// 대한민국 14개 주요 도시 셀렉터 옵션
+// 대한민국 14개 주요 도시 셀렉터 옵션 (제주: Jeju)
 const cityOptions = [
   { label: '서울', value: 'Seoul' },
   { label: '부산', value: 'Busan' },
@@ -25,7 +25,7 @@ const cityOptions = [
   { label: '광주', value: 'Gwangju' },
   { label: '울산', value: 'Ulsan' },
   { label: '수원', value: 'Suwon' },
-  { label: '제주', value: 'Jeju-si' },
+  { label: '제주', value: 'Jeju' },
   { label: '춘천', value: 'Chuncheon' },
   { label: '강릉', value: 'Gangneung' },
   { label: '전주', value: 'Jeonju' },
